@@ -1,4 +1,4 @@
-package com.junerver.corelib
+package com.junerver.utils.ex
 
 
 import android.app.Activity
