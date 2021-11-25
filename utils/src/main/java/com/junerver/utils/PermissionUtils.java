@@ -3,8 +3,10 @@ package com.junerver.utils;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -551,6 +553,24 @@ public final class PermissionUtils {
                 sSimpleCallback4DrawOverlays = null;
             }
         }
+    }
+
+    /**
+     * 判断GPS是否开启
+     */
+    public boolean isGpsOpen(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        // 通过GPS卫星定位，定位级别可以精确到街（通过24颗卫星定位，在室外和空旷的地方定位准确、速度快）
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    /**
+     * 强制打开GPS
+     */
+    public void openGps(Context context) {
+        Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(settingsIntent);
     }
 
     ///////////////////////////////////////////////////////////////////////////
