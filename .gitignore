@@ -41,3 +41,5 @@ local.properties
 .navigation/
 # Android Studio captures folder
 captures/
+gradle.properties
+secring.gpg
