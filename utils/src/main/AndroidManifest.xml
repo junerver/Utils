@@ -3,7 +3,7 @@
     package="com.junerver.utils">
 
     <application>
-        <activity android:name=".UtilsTransActivity"
+        <activity android:name="xyz.junerver.utils.UtilsTransActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:multiprocess="true"
             android:theme="@style/ActivityTranslucent"
