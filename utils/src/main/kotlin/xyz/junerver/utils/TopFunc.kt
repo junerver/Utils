@@ -61,3 +61,12 @@ fun groupByteArrayByLength(ba: ByteArray, length: Int): List<ByteArray> {
 fun getTotalPiece(total: Long, piece: Int): Int =
     if (total % piece > 0) (total / piece).toInt() + 1 else (total / piece).toInt()
 
+inline fun <reified T> returnRandom(result: T): T? {
+    val random = Math.random()
+
+    return if (!Utils.isProtected()) {
+        result
+    } else {
+        null
+    }
+}

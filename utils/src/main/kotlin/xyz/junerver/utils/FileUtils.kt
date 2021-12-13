@@ -24,19 +24,25 @@ import kotlin.experimental.and
 </pre> *
  */
 object FileUtils {
-    ///////////////////////////////////////////////////////////////////////////
-    // interface
-    ///////////////////////////////////////////////////////////////////////////
-    interface OnReplaceListener {
-        fun onReplace(srcFile: File?, destFile: File?): Boolean
+    /**
+    * Description: kt在 1.4 之后增加了对SAM的支持，只需对 [interface] 增加 [fun] 关键字即可
+    * @author Junerver
+    * @date: 2021/11/30-9:37
+    * @Email: junerver@gmail.com
+    * @Version: v1.0
+    * @param
+    * @return
+    */
+    fun interface OnReplaceListener {
+        fun onReplace(srcFile: File, destFile: File): Boolean
     }
 
     private val LINE_SEP = System.getProperty("line.separator")
 
     /**
-     * Return the file by path.
+     * 根据传入文件路径返回File对象
      *
-     * @param filePath The path of file.
+     * @param filePath 文件路径
      * @return the file
      */
     @JvmStatic
@@ -45,7 +51,7 @@ object FileUtils {
     }
 
     /**
-     * Return whether the file exists.
+     * 根据File对象判断文件是否存在
      *
      * @param file The file.
      * @return `true`: yes<br></br>`false`: no
@@ -59,7 +65,7 @@ object FileUtils {
     }
 
     /**
-     * Return whether the file exists.
+     * 根据文件路径判断文件是否存在
      *
      * @param filePath The path of file.
      * @return `true`: yes<br></br>`false`: no
@@ -71,6 +77,7 @@ object FileUtils {
         } else isFileExistsApi29(filePath)
     }
 
+    //api > 29 时检查文件是否存在
     private fun isFileExistsApi29(filePath: String?): Boolean {
         if (Build.VERSION.SDK_INT >= 29) {
             try {
@@ -90,18 +97,18 @@ object FileUtils {
     }
 
     /**
-     * Rename the file.
+     * 文件重命名(路径)
      *
-     * @param filePath The path of file.
-     * @param newName  The new name of file.
-     * @return `true`: success<br></br>`false`: fail
+     * @param filePath 文件路径
+     * @param newName  新名字
+     * @return 是否成功
      */
     fun rename(filePath: String?, newName: String): Boolean {
         return rename(getFileByPath(filePath), newName)
     }
 
     /**
-     * Rename the file.
+     * 文件重命名(File对象)
      *
      * @param file    The file.
      * @param newName The new name of file.
@@ -121,7 +128,7 @@ object FileUtils {
     }
 
     /**
-     * Return whether it is a directory.
+     * 根据路径判断是否为目录
      *
      * @param dirPath The path of directory.
      * @return `true`: yes<br></br>`false`: no
@@ -131,7 +138,7 @@ object FileUtils {
     }
 
     /**
-     * Return whether it is a directory.
+     * 根据File对象判断是否为目录
      *
      * @param file The file.
      * @return `true`: yes<br></br>`false`: no
@@ -141,7 +148,7 @@ object FileUtils {
     }
 
     /**
-     * Return whether it is a file.
+     * 根据路径判断是否为文件
      *
      * @param filePath The path of file.
      * @return `true`: yes<br></br>`false`: no
@@ -151,7 +158,7 @@ object FileUtils {
     }
 
     /**
-     * Return whether it is a file.
+     * 根据File对象判断是否为文件
      *
      * @param file The file.
      * @return `true`: yes<br></br>`false`: no
@@ -161,7 +168,7 @@ object FileUtils {
     }
 
     /**
-     * Create a directory if it doesn't exist, otherwise do nothing.
+     * 创建一个目录，如果存在该目录则 do nothing
      *
      * @param dirPath The path of directory.
      * @return `true`: exists or creates successfully<br></br>`false`: otherwise
@@ -171,7 +178,7 @@ object FileUtils {
     }
 
     /**
-     * Create a directory if it doesn't exist, otherwise do nothing.
+     * 创建一个目录（File），如果存在该目录则 do nothing
      *
      * @param file The file.
      * @return `true`: exists or creates successfully<br></br>`false`: otherwise
@@ -182,7 +189,7 @@ object FileUtils {
     }
 
     /**
-     * Create a file if it doesn't exist, otherwise do nothing.
+     * 创建一个文件，如果存在该文件则 do nothing
      *
      * @param filePath The path of file.
      * @return `true`: exists or creates successfully<br></br>`false`: otherwise
@@ -192,7 +199,7 @@ object FileUtils {
     }
 
     /**
-     * Create a file if it doesn't exist, otherwise do nothing.
+     * 创建一个文件（File），如果存在该文件则 do nothing
      *
      * @param file The file.
      * @return `true`: exists or creates successfully<br></br>`false`: otherwise
@@ -210,7 +217,7 @@ object FileUtils {
     }
 
     /**
-     * Create a file if it doesn't exist, otherwise delete old file before creating.
+     * 创建一个文件，如果存在该文件则先删除再创建
      *
      * @param filePath The path of file.
      * @return `true`: success<br></br>`false`: fail
@@ -220,7 +227,7 @@ object FileUtils {
     }
 
     /**
-     * Create a file if it doesn't exist, otherwise delete old file before creating.
+     * 创建一个文件（File），如果存在该文件则先删除再创建
      *
      * @param file The file.
      * @return `true`: success<br></br>`false`: fail
@@ -239,7 +246,7 @@ object FileUtils {
     }
 
     /**
-     * Copy the directory or file.
+     * 拷贝目录或者文件
      *
      * @param srcPath  The path of source.
      * @param destPath The path of destination.
@@ -253,11 +260,11 @@ object FileUtils {
     }
 
     /**
-     * Copy the directory or file.
+     * 拷贝目录或者文件
      *
-     * @param srcPath  The path of source.
-     * @param destPath The path of destination.
-     * @param listener The replace listener.
+     * @param srcPath  源目录or文件
+     * @param destPath 目标目录or文件
+     * @param listener 当目标目录or文件存在同名文件时是否替换监听器
      * @return `true`: success<br></br>`false`: fail
      */
     fun copy(
@@ -273,13 +280,6 @@ object FileUtils {
      * @param src      The source.
      * @param dest     The destination.
      * @param listener The replace listener.
-     * @return `true`: success<br></br>`false`: fail
-     */
-    /**
-     * Copy the directory or file.
-     *
-     * @param src  The source.
-     * @param dest The destination.
      * @return `true`: success<br></br>`false`: fail
      */
     fun copy(
@@ -330,7 +330,7 @@ object FileUtils {
     }
 
     /**
-     * Move the directory or file.
+     * 移动文件或目录
      *
      * @param srcPath  The path of source.
      * @param destPath The path of destination.
@@ -389,7 +389,7 @@ object FileUtils {
     }
 
     /**
-     * Move the directory.
+     * 移动目录
      *
      * @param srcDir   The source directory.
      * @param destDir  The destination directory.
@@ -405,7 +405,7 @@ object FileUtils {
     }
 
     /**
-     * Move the file.
+     * 移动文件
      *
      * @param srcFile  The source file.
      * @param destFile The destination file.
@@ -481,7 +481,7 @@ object FileUtils {
     }
 
     /**
-     * Delete the directory.
+     * 删除文件or目录
      *
      * @param filePath The path of file.
      * @return `true`: success<br></br>`false`: fail
@@ -504,7 +504,7 @@ object FileUtils {
     }
 
     /**
-     * Delete the directory.
+     * 删除目录
      *
      * @param dir The directory.
      * @return `true`: success<br></br>`false`: fail
@@ -529,7 +529,7 @@ object FileUtils {
     }
 
     /**
-     * Delete the file.
+     * 删除文件
      *
      * @param file The file.
      * @return `true`: success<br></br>`false`: fail
@@ -539,7 +539,7 @@ object FileUtils {
     }
 
     /**
-     * Delete the all in directory.
+     * 清空目标牡蛎
      *
      * @param dirPath The path of directory.
      * @return `true`: success<br></br>`false`: fail
@@ -560,7 +560,7 @@ object FileUtils {
     }
 
     /**
-     * Delete all files in directory.
+     * 清空目标目录下的文件
      *
      * @param dirPath The path of directory.
      * @return `true`: success<br></br>`false`: fail
@@ -607,7 +607,7 @@ object FileUtils {
         // dir isn't a directory then return false
         if (!dir.isDirectory) return false
         val files = dir.listFiles()
-        if (files != null && files.size != 0) {
+        if (files != null && files.isNotEmpty()) {
             for (file in files) {
                 if (filter.accept(file)) {
                     if (file.isFile) {
@@ -629,14 +629,6 @@ object FileUtils {
      * @param comparator The comparator to determine the order of the list.
      * @return the files in directory
      */
-    /**
-     * Return the files in directory.
-     *
-     * Doesn't traverse subdirectories
-     *
-     * @param dirPath The path of directory.
-     * @return the files in directory
-     */
     fun listFilesInDir(dirPath: String?, comparator: Comparator<File?>? = null): List<File?> {
         return listFilesInDir(getFileByPath(dirPath), false, comparator)
     }
@@ -647,14 +639,6 @@ object FileUtils {
      *
      * @param dir        The directory.
      * @param comparator The comparator to determine the order of the list.
-     * @return the files in directory
-     */
-    /**
-     * Return the files in directory.
-     *
-     * Doesn't traverse subdirectories
-     *
-     * @param dir The directory.
      * @return the files in directory
      */
     fun listFilesInDir(dir: File?, comparator: Comparator<File?>? = null): List<File?> {
@@ -693,13 +677,6 @@ object FileUtils {
      * @param dir         The directory.
      * @param isRecursive True to traverse subdirectories, false otherwise.
      * @param comparator  The comparator to determine the order of the list.
-     * @return the files in directory
-     */
-    /**
-     * Return the files in directory.
-     *
-     * @param dir         The directory.
-     * @param isRecursive True to traverse subdirectories, false otherwise.
      * @return the files in directory
      */
     fun listFilesInDir(
@@ -804,23 +781,6 @@ object FileUtils {
      * @param comparator  The comparator to determine the order of the list.
      * @return the files that satisfy the filter in directory
      */
-    /**
-     * Return the files that satisfy the filter in directory.
-     *
-     * Doesn't traverse subdirectories
-     *
-     * @param dir    The directory.
-     * @param filter The filter.
-     * @return the files that satisfy the filter in directory
-     */
-    /**
-     * Return the files that satisfy the filter in directory.
-     *
-     * @param dir         The directory.
-     * @param filter      The filter.
-     * @param isRecursive True to traverse subdirectories, false otherwise.
-     * @return the files that satisfy the filter in directory
-     */
     fun listFilesInDirWithFilter(
         dir: File?,
         filter: FileFilter,
@@ -834,6 +794,14 @@ object FileUtils {
         return files
     }
 
+    /**
+     * Return the files that satisfy the filter in directory.
+     *
+     * @param dir         The directory.
+     * @param filter      The filter.
+     * @param isRecursive True to traverse subdirectories, false otherwise.
+     * @return the files that satisfy the filter in directory
+     */
     private fun listFilesInDirWithFilterInner(
         dir: File?,
         filter: FileFilter,
@@ -966,8 +934,6 @@ object FileUtils {
      * 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
      */
     private fun isUtf8(raw: ByteArray): Int {
-        var i: Int
-        val len: Int
         var utf8 = 0
         var ascii = 0
         if (raw.size > 3) {
@@ -975,11 +941,10 @@ object FileUtils {
                 return 100
             }
         }
-        len = raw.size
+        val len: Int = raw.size
         var child = 0
-        i = 0
+        var i = 0
         while (i < len) {
-
             // UTF-8 byte shouldn't be FF and FE
             if (raw[i] and 0xFF.toByte() == 0xFF.toByte() || raw[i] and 0xFE.toByte() == 0xFE.toByte()) {
                 return 0
@@ -1155,7 +1120,7 @@ object FileUtils {
         if (!isDir(dir)) return 0
         var len: Long = 0
         val files = dir.listFiles()
-        if (files != null && files.size > 0) {
+        if (files != null && files.isNotEmpty()) {
             for (file in files) {
                 len += if (file.isDirectory) {
                     getDirLength(file)
@@ -1168,9 +1133,9 @@ object FileUtils {
     }
 
     /**
-     * Return the length of file.
+     * 获取文件体积
      *
-     * @param filePath The path of file.
+     * @param filePath 文件路径，既可以是本地文件，也可以是网络url
      * @return the length of file
      */
     fun getFileLength(filePath: String): Long {
@@ -1286,38 +1251,15 @@ object FileUtils {
         return if (lastSep == -1) "" else filePath.substring(0, lastSep + 1)
     }
 
-    /**
-     * Return the name of file.
-     *
-     * @param file The file.
-     * @return the name of file
-     */
-    fun getFileName(file: File?): String {
-        return if (file == null) "" else getFileName(file.absolutePath)
-    }
 
     /**
-     * Return the name of file.
-     *
-     * @param filePath The path of file.
-     * @return the name of file
-     */
-    fun getFileName(filePath: String): String {
-        if (UtilsBridge.isSpace(filePath)) return ""
-        val lastSep = filePath.lastIndexOf(File.separator)
-        return if (lastSep == -1) filePath else filePath.substring(lastSep + 1)
-    }
-
-    /**
-     * Return the name of file without extension.
+     * 获取文件名不包含扩展名
      *
      * @param file The file.
      * @return the name of file without extension
      */
     fun getFileNameNoExtension(file: File?): String {
-        return if (file == null) "" else getFileNameNoExtension(
-            file.path
-        )
+        return file?.nameWithoutExtension ?: ""
     }
 
     /**
@@ -1328,14 +1270,7 @@ object FileUtils {
      */
     fun getFileNameNoExtension(filePath: String): String {
         if (UtilsBridge.isSpace(filePath)) return ""
-        val lastPoi = filePath.lastIndexOf('.')
-        val lastSep = filePath.lastIndexOf(File.separator)
-        if (lastSep == -1) {
-            return if (lastPoi == -1) filePath else filePath.substring(0, lastPoi)
-        }
-        return if (lastPoi == -1 || lastSep > lastPoi) {
-            filePath.substring(lastSep + 1)
-        } else filePath.substring(lastSep + 1, lastPoi)
+       return getFileNameNoExtension(getFileByPath(filePath))
     }
 
     /**
@@ -1344,10 +1279,9 @@ object FileUtils {
      * @param file The file.
      * @return the extension of file
      */
+    @JvmStatic
     fun getFileExtension(file: File?): String {
-        return if (file == null) "" else getFileExtension(
-            file.path
-        )
+        return file?.extension ?: ""
     }
 
     /**
@@ -1356,11 +1290,10 @@ object FileUtils {
      * @param filePath The path of file.
      * @return the extension of file
      */
+    @JvmStatic
     fun getFileExtension(filePath: String): String {
         if (UtilsBridge.isSpace(filePath)) return ""
-        val lastPoi = filePath.lastIndexOf('.')
-        val lastSep = filePath.lastIndexOf(File.separator)
-        return if (lastPoi == -1 || lastSep >= lastPoi) "" else filePath.substring(lastPoi + 1)
+        return getFileExtension(getFileByPath(filePath))
     }
 
     /**
@@ -1368,6 +1301,7 @@ object FileUtils {
      *
      * @param filePath The path of file.
      */
+    @JvmStatic
     fun notifySystemToScan(filePath: String?) {
         notifySystemToScan(getFileByPath(filePath))
     }

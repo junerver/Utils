@@ -13,6 +13,10 @@ import android.app.Application
  */
 object Utils {
 
+    private var isProtect = false
+
+    fun isProtected() = isProtect
+
     private lateinit var APP: Application
 
     @JvmStatic
@@ -27,7 +31,7 @@ object Utils {
     }
 
     @JvmStatic
-    fun getApp() = if (!this::APP.isInitialized) throw NullPointerException() else APP
+    fun getApp() = if (!this::APP.isInitialized) throw UninitializedPropertyAccessException("Utils 尚未初始化，请在 Application 中调用 init 函数！") else APP
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -47,15 +51,15 @@ object Utils {
         fun onBackground(activity: Activity?)
     }
 
-    interface Consumer<T> {
+    fun interface Consumer<T> {
         fun accept(t: T)
     }
 
-    interface Supplier<T> {
+    fun interface Supplier<T> {
         fun get(): T
     }
 
-    interface Func1<Ret, Par> {
+    fun interface Func1<Ret, Par> {
         fun call(param: Par): Ret
     }
 
