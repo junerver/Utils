@@ -50,21 +50,22 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-//        etString.addTextChangedListenerDsl {
-//            afterTextChanged {
-//                if (it.toString().length >= 4) {
-//                    KeyboardUtils.toggleSoftInput()
-//                }
-//            }
-//        }
-//
-//        etString.addTextChangedListenerClosure(
-//            afterTextChanged = {
-//                if (it.toString().length >= 4) {
-//                    KeyboardUtils.toggleSoftInput()
-//                }
-//            }
-//        )
+        etString.addTextChangedListenerDsl {
+            afterTextChanged {
+                if (it.toString().length >= 4) {
+                    KeyboardUtils.toggleSoftInput()
+                }
+            }
+        }
+
+        etString.addTextChangedListenerClosure(
+            afterTextChanged = {
+                if (it.toString().length >= 4) {
+                    KeyboardUtils.toggleSoftInput()
+                }
+            },
+
+        )
 
         etString.addTextChangedListenerClosure { charSequence, i, i2, i3 ->
             println("on call")

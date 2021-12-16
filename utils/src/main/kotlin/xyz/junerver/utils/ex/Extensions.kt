@@ -30,6 +30,7 @@ import xyz.junerver.utils.groupStringByLength
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.URLEncoder
 import java.util.regex.Pattern
 
 
@@ -395,6 +396,11 @@ fun String.upperFirstLetter():String{
         return (this[0].code- 32).toChar() + this.substring(1)
     }
 
+}
+
+fun String.urlEncode(): String {
+    val encode:String = URLEncoder.encode(this, "utf-8")
+    return encode.replace("%3A", ":").replace("%2F", "/")
 }
 
 /**

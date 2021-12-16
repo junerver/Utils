@@ -26,6 +26,7 @@ class ExampleUnitTest {
 
         println(FileUtils.getFileExtension("D:\\ftp_root\\test\\ToastUtil.kt"))
         println(File("D:\\ftp_root\\test\\ToastUtil.kt"))
+        println(File("D:\\ftp_root\\test\\ToastUtil.kt").lastModified())
 
 //        val l =
 //            FileUtils.getFileLength("https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png")
