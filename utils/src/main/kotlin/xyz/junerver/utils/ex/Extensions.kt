@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Base64
@@ -21,6 +23,7 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.fragment.app.Fragment
 import com.google.gson.ExclusionStrategy
 import com.google.gson.FieldAttributes
 import com.google.gson.GsonBuilder
@@ -662,5 +665,78 @@ fun Context.copyAssetFile(assetName: String, savePath: String, saveName: String)
     myOutput.flush()
     myInput.close()
     myOutput.close()
+}
+//endregion
+
+//region 全局的UI线程回调函数
+fun <T> T.postUI(action: () -> Unit) {
+
+    // Fragment
+    if (this is Fragment) {
+        val fragment = this
+        if (!fragment.isAdded) return
+
+        val activity = fragment.activity ?: return
+        if (activity.isFinishing) return
+
+        activity.runOnUiThread(action)
+        return
+    }
+
+    // Activity
+    if (this is Activity) {
+        if (this.isFinishing) return
+
+        this.runOnUiThread(action)
+        return
+    }
+
+    // 主线程
+    if (Looper.getMainLooper() === Looper.myLooper()) {
+        action()
+        return
+    }
+
+    // 子线程，使用handler
+    KitUtil.handler.post { action() }
+}
+
+object KitUtil{
+    val handler: Handler by lazy {  Handler(Looper.getMainLooper()) }
+}
+//endregion
+
+//region 带参数的单例封装
+/**
+ * 使用方法：
+ * class SomeSingleton{
+ *   companion object {
+ *       val instance: SomeSingleton by lazy { SomeSingleton() }
+ *   }
+ * }
+ */
+open class SingletonHolder<out T, in A>(creator: (A) -> T) {
+    private var creator: ((A) -> T)? = creator
+    @Volatile
+    private var instance: T? = null
+
+    fun getInstance(arg: A): T {
+        val i = instance
+        if (i != null) {
+            return i
+        }
+
+        return synchronized(this) {
+            val i2 = instance
+            if (i2 != null) {
+                i2
+            } else {
+                val created = creator!!(arg)
+                instance = created
+                creator = null
+                created
+            }
+        }
+    }
 }
 //endregion

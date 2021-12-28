@@ -32,6 +32,17 @@ class ExampleUnitTest {
 //            FileUtils.getFileLength("https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png")
 //        println(l)
     }
+
+    @Test
+    fun testSet() {
+        val set = mutableSetOf<Char>()
+        set.add('a')
+        set.add('b')
+        set.add('c')
+        set.add('d')
+        set.add('a')
+        println(set.size)
+    }
 }
 
 
