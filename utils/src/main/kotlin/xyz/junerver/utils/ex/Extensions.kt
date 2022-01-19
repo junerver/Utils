@@ -306,6 +306,20 @@ fun TextView.stringTrim(): String {
 
 //region String 扩展
 /**
+* Description: 校验是否为合法文件名
+* @author Junerver
+* @date: 2021/12/30-14:31
+* @Email: junerver@gmail.com
+* @Version: v1.0
+* @param
+* @return
+*/
+fun String.isValidFileName(): Boolean {
+    val regex = "[^\\s\\\\/:\\*\\?\\\"<>\\|](\\x20|[^\\s\\\\/:\\*\\?\\\"<>\\|])*[^\\s\\\\/:\\*\\?\\\"<>\\|\\.]$"
+    return Pattern.matches(regex,this)
+}
+
+/**
  * 验证是否手机
  */
 fun String.isMobile(): Boolean {
