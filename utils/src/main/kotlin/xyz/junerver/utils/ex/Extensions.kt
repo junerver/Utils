@@ -306,17 +306,18 @@ fun TextView.stringTrim(): String {
 
 //region String 扩展
 /**
-* Description: 校验是否为合法文件名
-* @author Junerver
-* @date: 2021/12/30-14:31
-* @Email: junerver@gmail.com
-* @Version: v1.0
-* @param
-* @return
-*/
+ * Description: 校验是否为合法文件名
+ * @author Junerver
+ * @date: 2021/12/30-14:31
+ * @Email: junerver@gmail.com
+ * @Version: v1.0
+ * @param
+ * @return
+ */
 fun String.isValidFileName(): Boolean {
-    val regex = "[^\\s\\\\/:\\*\\?\\\"<>\\|](\\x20|[^\\s\\\\/:\\*\\?\\\"<>\\|])*[^\\s\\\\/:\\*\\?\\\"<>\\|\\.]$"
-    return Pattern.matches(regex,this)
+    val regex =
+        "[^\\s\\\\/:\\*\\?\\\"<>\\|](\\x20|[^\\s\\\\/:\\*\\?\\\"<>\\|])*[^\\s\\\\/:\\*\\?\\\"<>\\|\\.]$"
+    return Pattern.matches(regex, this)
 }
 
 /**
@@ -405,18 +406,18 @@ fun String.decodeBase64(): String = String(this.base64toByteArray())
 fun String.groupByLength(length: Int): List<String> = groupStringByLength(this, length)
 
 //首字母大写
-fun String.upperFirstLetter():String{
+fun String.upperFirstLetter(): String {
     return if (this.isNullOrEmpty()) {
         ""
-    }else{
+    } else {
         if (!Character.isLowerCase(this[0])) return this
-        return (this[0].code- 32).toChar() + this.substring(1)
+        return (this[0].code - 32).toChar() + this.substring(1)
     }
 
 }
 
 fun String.urlEncode(): String {
-    val encode:String = URLEncoder.encode(this, "utf-8")
+    val encode: String = URLEncoder.encode(this, "utf-8")
     return encode.replace("%3A", ":").replace("%2F", "/")
 }
 
@@ -424,7 +425,7 @@ fun String.urlEncode(): String {
  * @作者 尧
  * @功能 String左对齐
  */
-fun String.padLeft(len: Int, ch: Char):String {
+fun String.padLeft(len: Int, ch: Char): String {
     val diff = len - this.length
     if (diff <= 0) {
         return this
@@ -442,7 +443,7 @@ fun String.padLeft(len: Int, ch: Char):String {
  * @作者 尧
  * @功能 String右对齐
  */
-fun String.padRight( len: Int, ch: Char): String {
+fun String.padRight(len: Int, ch: Char): String {
     val diff = len - this.length
     if (diff <= 0) {
         return this
@@ -459,25 +460,31 @@ fun String.padRight( len: Int, ch: Char): String {
 
 //region Json & Gson
 /** json相关 **/
-fun Any.toJson(dateFormat: String = "yyyy-MM-dd HH:mm:ss", lenient: Boolean = false, excludeFields: List<String>? = null)
-        = GsonBuilder().setDateFormat(dateFormat)
+fun Any.toJson(
+    dateFormat: String = "yyyy-MM-dd HH:mm:ss",
+    lenient: Boolean = false,
+    excludeFields: List<String>? = null
+) = GsonBuilder().setDateFormat(dateFormat)
     .apply {
-        if(lenient) setLenient()
-        if(!excludeFields.isNullOrEmpty()){
+        if (lenient) setLenient()
+        if (!excludeFields.isNullOrEmpty()) {
             setExclusionStrategies(object : ExclusionStrategy {
                 override fun shouldSkipField(f: FieldAttributes?): Boolean {
-                    return f!=null && excludeFields.contains(f.name)
+                    return f != null && excludeFields.contains(f.name)
                 }
+
                 override fun shouldSkipClass(clazz: Class<*>?) = false
             })
         }
     }
     .create().toJson(this)!!
 
-inline fun <reified T> String.toBean(dateFormat: String = "yyyy-MM-dd HH:mm:ss", lenient: Boolean = false)
-        = GsonBuilder().setDateFormat(dateFormat)
+inline fun <reified T> String.toBean(
+    dateFormat: String = "yyyy-MM-dd HH:mm:ss",
+    lenient: Boolean = false
+) = GsonBuilder().setDateFormat(dateFormat)
     .apply {
-        if(lenient) setLenient()
+        if (lenient) setLenient()
     }.create()
     .fromJson<T>(this, object : TypeToken<T>() {}.type)!!
 //endregion
@@ -632,19 +639,27 @@ fun Context.getUriForFile(file: File): Uri {
 //}
 
 
-//获取mainifest文件中的metedata对象数据
-inline fun <reified T> Context.getMeteData(key: String, def: T): T {
+/**
+* Description: 获取manifest文件中的metadata对象数据
+* @author Junerver
+* @date: 2021/2/8-10:17
+* @Email: junerver@gmail.com
+* @Version: v1.0
+* @param key  meta-data 中的android:name
+* @param def 当没有取到该字段值时的缺省值
+* @return
+*/
+inline fun <reified T> Context.getMetaData(key: String, def: T): T {
     val applicationInfo =
         this.packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
     val data = applicationInfo.metaData.get(key)
-    return when (T::class) {
-        Int::class -> data as Int
-        String::class -> data as String
-        Long::class -> (data as Float).toLong() //存储时以float类型保存，最大值不能超过
-        Float::class -> data as Float
-        Boolean::class -> data as Boolean
-        else -> throw IllegalArgumentException("METE-DATA 类型错误")
-    } as T
+    return data?.let {
+        when (T::class) {
+            Int::class, String::class, Float::class, Boolean::class -> it
+            Long::class -> (data as Float).toLong() //存储时以float类型保存
+            else -> throw IllegalArgumentException("META-DATA 类型错误")
+        } as T
+    } ?: kotlin.run { def }
 }
 
 /**
@@ -684,19 +699,15 @@ fun Context.copyAssetFile(assetName: String, savePath: String, saveName: String)
 
 //region 全局的UI线程回调函数
 fun <T> T.postUI(action: () -> Unit) {
-
     // Fragment
     if (this is Fragment) {
         val fragment = this
         if (!fragment.isAdded) return
-
         val activity = fragment.activity ?: return
         if (activity.isFinishing) return
-
         activity.runOnUiThread(action)
         return
     }
-
     // Activity
     if (this is Activity) {
         if (this.isFinishing) return
@@ -704,19 +715,17 @@ fun <T> T.postUI(action: () -> Unit) {
         this.runOnUiThread(action)
         return
     }
-
     // 主线程
     if (Looper.getMainLooper() === Looper.myLooper()) {
         action()
         return
     }
-
     // 子线程，使用handler
     KitUtil.handler.post { action() }
 }
 
-object KitUtil{
-    val handler: Handler by lazy {  Handler(Looper.getMainLooper()) }
+object KitUtil {
+    val handler: Handler by lazy { Handler(Looper.getMainLooper()) }
 }
 //endregion
 
@@ -731,6 +740,7 @@ object KitUtil{
  */
 open class SingletonHolder<out T, in A>(creator: (A) -> T) {
     private var creator: ((A) -> T)? = creator
+
     @Volatile
     private var instance: T? = null
 

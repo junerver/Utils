@@ -8,11 +8,8 @@ import android.text.TextWatcher
 import android.text.method.DigitsKeyListener
 import android.util.Log
 import com.junerver.utils.R
-import xyz.junerver.utils.ex.trimTextStr
 import kotlinx.android.synthetic.main.activity_main.*
-import xyz.junerver.utils.ex.addTextChangedListenerClosure
-import xyz.junerver.utils.ex.addTextChangedListenerDsl
-import xyz.junerver.utils.ex.hideBottomUIMenu
+import xyz.junerver.utils.ex.*
 import java.util.*
 
 private const val TAG = "MainActivity"
@@ -24,6 +21,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
+        Log.d(TAG, "metadata: ${getMetaData("value_key","def")}")
         btnEnable.setOnClickListener {
 
 //            PermissionUtils.permission(Manifest.permission.READ_CALENDAR, Manifest.permission.RECORD_AUDIO)
