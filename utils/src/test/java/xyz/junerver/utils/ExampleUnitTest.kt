@@ -3,6 +3,9 @@ package xyz.junerver.utils
 import org.junit.Test
 
 import org.junit.Assert.*
+import xyz.junerver.utils.TimeUtils.TimeUnit.Companion.timeUnitSeconds
+import xyz.junerver.utils.TimeUtils.formatMillisTimestamp
+import xyz.junerver.utils.TimeUtils.isMorning
 import java.io.File
 
 /**
@@ -27,8 +30,18 @@ class ExampleUnitTest {
             true
         }
 
-        FileUtils.copy("","",{ file: File, file1: File ->
+        FileUtils.copy("","") { file: File, file1: File ->
             true
-        })
+        }
+    }
+
+    @Test
+    fun testTimeUtil() {
+        val time = "1644372399000"
+        assertEquals("2022-02-09 10:06:39",time.formatMillisTimestamp())
+        println(TimeUtils.millis2FitTimeSpan(100000000,4))
+        println(TimeUtils.getDate())
+        println(isMorning())
+        println(TimeUtils.getAge(1297217199L.timeUnitSeconds))
     }
 }

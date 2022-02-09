@@ -1,9 +1,12 @@
 package xyz.junerver.utils
 
 import android.annotation.SuppressLint
+import xyz.junerver.utils.TimeUtils.TimeUnit.Companion.currentTimeUnit
+import xyz.junerver.utils.TimeUtils.TimeUnit.Companion.timeUnitMillis
 import java.lang.StringBuilder
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.min
 
 
 /**
@@ -17,50 +20,50 @@ object TimeUtils {
     val SYSTEM_START_DATE = intArrayOf(1970, 0, 1, 0, 0, 0)
 
 
-    val LEVEL_YEAR = 0
-    val LEVEL_MONTH = 1
-    val LEVEL_DAY = 2
-    val LEVEL_HOUR = 3
-    val LEVEL_MINUTE = 4
-    val LEVEL_SECOND = 5
+    const val LEVEL_YEAR = 0
+    const val LEVEL_MONTH = 1
+    const val LEVEL_DAY = 2
+    const val LEVEL_HOUR = 3
+    const val LEVEL_MINUTE = 4
+    const val LEVEL_SECOND = 5
     val LEVELS =
         intArrayOf(LEVEL_YEAR, LEVEL_MONTH, LEVEL_DAY, LEVEL_HOUR, LEVEL_MINUTE, LEVEL_SECOND)
 
-    val NAME_YEAR = "年"
-    val NAME_MONTH = "月"
-    val NAME_DAY = "日"
-    val NAME_HOUR = "时"
-    val NAME_MINUTE = "分"
-    val NAME_SECOND = "秒"
+    const val NAME_YEAR = "年"
+    const val NAME_MONTH = "月"
+    const val NAME_DAY = "日"
+    const val NAME_HOUR = "时"
+    const val NAME_MINUTE = "分"
+    const val NAME_SECOND = "秒"
     val LEVEL_NAMES = arrayOf(NAME_YEAR, NAME_MONTH, NAME_DAY, NAME_HOUR, NAME_MINUTE, NAME_SECOND)
 
 
-    val YEAR = 0
-    val MONTH = 1
-    val DAY_OF_MONTH = 2
-    val HOUR_OF_DAY = 3
-    val MINUTE = 4
-    val SECOND = 5
+    const val YEAR = 0
+    const val MONTH = 1
+    const val DAY_OF_MONTH = 2
+    const val HOUR_OF_DAY = 3
+    const val MINUTE = 4
+    const val SECOND = 5
 
 
     val MIN_TIME_DETAILS = intArrayOf(0, 0, 0)
     val MAX_TIME_DETAILS = intArrayOf(23, 59, 59)
 
 
-    val NAME_THE_DAY_BEFORE_YESTERDAY = "前天"
-    val NAME_YESTERDAY = "昨天"
-    val NAME_TODAY = "今天"
-    val NAME_TOMORROW = "明天"
-    val NAME_THE_DAY_AFTER_TOMORROW = "后天"
+    const val NAME_THE_DAY_BEFORE_YESTERDAY = "前天"
+    const val NAME_YESTERDAY = "昨天"
+    const val NAME_TODAY = "今天"
+    const val NAME_TOMORROW = "明天"
+    const val NAME_THE_DAY_AFTER_TOMORROW = "后天"
 
 
-    val TYPE_SUNDAY = 0
-    val TYPE_MONDAY = 1
-    val TYPE_TUESDAY = 2
-    val TYPE_WEDNESDAY = 3
-    val TYPE_THURSDAY = 4
-    val TYPE_FRIDAY = 5
-    val TYPE_SATURDAY = 6
+    const val TYPE_SUNDAY = 0
+    const val TYPE_MONDAY = 1
+    const val TYPE_TUESDAY = 2
+    const val TYPE_WEDNESDAY = 3
+    const val TYPE_THURSDAY = 4
+    const val TYPE_FRIDAY = 5
+    const val TYPE_SATURDAY = 6
     val DAY_OF_WEEK_TYPES = intArrayOf(
         TYPE_SUNDAY,
         TYPE_MONDAY,
@@ -71,13 +74,13 @@ object TimeUtils {
         TYPE_SATURDAY
     )
 
-    val NAME_SUNDAY = "日"
-    val NAME_MONDAY = "一"
-    val NAME_TUESDAY = "二"
-    val NAME_WEDNESDAY = "三"
-    val NAME_THURSDAY = "四"
-    val NAME_FRIDAY = "五"
-    val NAME_SATURDAY = "六"
+    const val NAME_SUNDAY = "日"
+    const val NAME_MONDAY = "一"
+    const val NAME_TUESDAY = "二"
+    const val NAME_WEDNESDAY = "三"
+    const val NAME_THURSDAY = "四"
+    const val NAME_FRIDAY = "五"
+    const val NAME_SATURDAY = "六"
     val DAY_OF_WEEK_NAMES = arrayOf(
         NAME_SUNDAY,
         NAME_MONDAY,
@@ -88,21 +91,48 @@ object TimeUtils {
         NAME_SATURDAY
     )
 
+    @JvmInline
+    value class TimeUnit private constructor(
+        val millis: Long
+    ) {
+        companion object {
+
+            //对应构造值类的函数
+            fun millis(millis: Long) = TimeUnit(millis)
+
+            fun seconds(seconds: Long) = TimeUnit(seconds * 1000)
+
+            fun minutes(minutes: Long) = TimeUnit(minutes * 60 * 1000)
+
+            //获取当前的时间TimeUnit
+            val currentTimeUnit
+                get() = System.currentTimeMillis().timeUnitMillis
+
+            //扩展属性 Long毫秒时间戳转TimeUnit
+            val Long.timeUnitMillis
+                get() = millis(this)
+
+            //扩展属性 Long秒时间戳转TimeUnit
+            val Long.timeUnitSeconds
+                get() = seconds(this)
+        }
+    }
+
     /**获取日期 年，月， 日 对应值
      * @param date
      * @return
      */
-    fun getDateDetail(date: Date?): IntArray? {
-        return if (date == null) null else getDateDetail(date.time)
+    fun getDateDetail(date: Date): IntArray {
+        return getDateDetail(date.time.timeUnitMillis)
     }
 
     /**获取日期 年，月， 日 对应值
-     * @param time
+     * @param time 毫秒
      * @return
      */
-    fun getDateDetail(time: Long): IntArray {
+    fun getDateDetail(time: TimeUnit): IntArray {
         val mCalendar = Calendar.getInstance()
-        mCalendar.timeInMillis = time
+        mCalendar.timeInMillis = time.millis
         return intArrayOf(
             mCalendar.get(Calendar.YEAR), //0
             mCalendar.get(Calendar.MONTH) + 1, //1
@@ -117,12 +147,12 @@ object TimeUtils {
      * @param birthday
      * @return constellation
      */
-    fun getStar(birthday: Date): String {
+    fun getConstellation(birthday: Date): String {
         val c = Calendar.getInstance()
         c.time = birthday
         var month = c.get(Calendar.MONTH)
         val dayOfMonth = c.get(Calendar.DAY_OF_MONTH)
-        val DayArr = intArrayOf(19, 18, 20, 19, 20, 21, 22, 22, 22, 23, 22, 21)
+        val dayArr = intArrayOf(19, 18, 20, 19, 20, 21, 22, 22, 22, 23, 22, 21)
         val starArr = arrayOf(
             "魔羯座",
             "水瓶座",
@@ -137,8 +167,8 @@ object TimeUtils {
             "天蝎座",
             "射手座"
         )
-        if (dayOfMonth > DayArr[month]) {
-            month = month + 1
+        if (dayOfMonth > dayArr[month]) {
+            month += 1
             if (month == 12) {
                 month = 0
             }
@@ -153,9 +183,9 @@ object TimeUtils {
      * @param time
      * @return
      */
-    fun getWholeDetail(time: Long): IntArray {
+    fun getWholeDetail(time: TimeUnit): IntArray {
         val mCalendar = Calendar.getInstance()
-        mCalendar.timeInMillis = time
+        mCalendar.timeInMillis = time.millis
         return intArrayOf(
             mCalendar.get(Calendar.YEAR), //0
             mCalendar.get(Calendar.MONTH) + 1, //1
@@ -172,8 +202,8 @@ object TimeUtils {
      * @param date
      * @return
      */
-    fun Date?.getSmartDate(): String {
-        return this?.time?.getSmartDate() ?: ""
+    fun Date.getSmartDate(): String {
+        return this.time.getSmartDate()
     }
 
     /**
@@ -185,8 +215,8 @@ object TimeUtils {
     @SuppressLint("SimpleDateFormat")
     fun Long.getSmartDate(): String {
 
-        val nowDetails = getWholeDetail(System.currentTimeMillis())
-        val smartDetail = getWholeDetail(this)
+        val nowDetails = getWholeDetail(currentTimeUnit)
+        val smartDetail = getWholeDetail(this.timeUnitMillis)
 
         var smartDate = ""
 
@@ -238,9 +268,9 @@ object TimeUtils {
      * @param needYear
      * @return
      */
-    fun getSmartBirthday(birthday: Long, needYear: Boolean = true): String {
+    fun getSmartBirthday(birthday: TimeUnit, needYear: Boolean = true): String {
         val birthdayDetails = getDateDetail(birthday)
-        val nowDetails = getDateDetail(System.currentTimeMillis())
+        val nowDetails = getDateDetail(currentTimeUnit)
 
         val birthdayCalendar = Calendar.getInstance()
         birthdayCalendar.set(birthdayDetails[0], birthdayDetails[1], birthdayDetails[2])
@@ -274,10 +304,7 @@ object TimeUtils {
      * @param birthday
      * @return
      */
-    fun getAge(birthday: Date?): Int {
-        if (birthday == null) {
-            return 0
-        }
+    fun getAge(birthday: Date): Int {
         val calendar = Calendar.getInstance(Locale.CHINA)
         calendar.time = birthday
         return getAge(
@@ -293,7 +320,7 @@ object TimeUtils {
      * @param birthday
      * @return
      */
-    fun getAge(birthday: Long): Int {
+    fun getAge(birthday: TimeUnit): Int {
         return getAge(getDateDetail(birthday))
     }
 
@@ -306,15 +333,15 @@ object TimeUtils {
             return 0
         }
 
-        val nowDetails = getDateDetail(System.currentTimeMillis())
+        val nowDetails = getDateDetail(currentTimeUnit)
 
         var age = nowDetails[0] - birthdayDetail[0]
 
         if (nowDetails[1] < birthdayDetail[1]) {
-            age = age - 1
+            age -= 1
         } else if (nowDetails[1] == birthdayDetail[1]) {
             if (nowDetails[2] < birthdayDetail[2]) {
-                age = age - 1
+                age -= 1
             }
         }
 
@@ -327,11 +354,11 @@ object TimeUtils {
      */
 
     @SuppressLint("SimpleDateFormat")
-    fun Long.dateToString(format: String = "yyyy-MM-dd HH:mm:ss"): String? {
-        try {
-            return SimpleDateFormat(format).format(this)
+    fun Long.formatMillisTimestamp(format: String = "yyyy-MM-dd HH:mm:ss"): String {
+        return try {
+            SimpleDateFormat(format).format(this)
         } catch (e: Exception) {
-            return null
+            "错误的时间戳！"
         }
 
     }
@@ -341,49 +368,79 @@ object TimeUtils {
      */
 
     @SuppressLint("SimpleDateFormat")
-    fun Date.dateToString(format: String = "yyyy-MM-dd HH:mm:ss"): String? {
-        try {
-            return SimpleDateFormat(format).format(this.time)
+    fun Date.formatDate(format: String = "yyyy-MM-dd HH:mm:ss"): String {
+        return try {
+            SimpleDateFormat(format).format(this.time)
         } catch (e: Exception) {
-            return null
+            "错误的时间戳！"
         }
 
     }
 
+    //获取当前时间戳：毫秒
     fun currentTimeMillis(): Long {
         return System.currentTimeMillis()
     }
 
+    //获取当前时间戳：秒
     fun currentTimeSecond(): Long {
         return System.currentTimeMillis() / 1000
     }
 
-    fun String.timestampToString(format: String = "yyyy-MM-dd HH:mm:ss"): String? {
+    /**
+     * Description: 格式化毫秒时间戳字符串
+     * @author Junerver
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
+    fun String.formatMillisTimestamp(format: String = "yyyy-MM-dd HH:mm:ss"): String {
         return try {
             val time = this.toLong()
-            time.dateToString(format)
+            time.formatMillisTimestamp(format)
         } catch (e: Exception) {
-            null
+            "错误的时间戳！"
         }
     }
 
+    @Deprecated(
+        "函数名称不清晰，废弃", ReplaceWith(
+            "this.formatMillisTimestamp(format)",
+            "xyz.junerver.utils.TimeUtils.timestampToString",
+            "xyz.junerver.utils.TimeUtils.formatMillisTimestamp"
+        )
+    )
+    fun String.timestampToString(format: String = "yyyy-MM-dd HH:mm:ss"): String =
+        this.formatMillisTimestamp(format)
+
+
     /**
      * 获取系统时间
-     * @return
+     * @return 字符串完全拼接，可以用于给临时文件命名
      */
     fun getDate(): String {
-        var ca = Calendar.getInstance()
-        var year = ca.get(Calendar.YEAR)           // 获取年份
-        var month = ca.get(Calendar.MONTH)         // 获取月份
-        var day = ca.get(Calendar.DATE)            // 获取日
-        var minute = ca.get(Calendar.MINUTE)       // 分
-        var hour = ca.get(Calendar.HOUR)           // 小时
-        var second = ca.get(Calendar.SECOND)       // 秒
-        return "" + year + (month + 1) + day + hour + minute + second
+        val ca = Calendar.getInstance()
+        val year = ca.get(Calendar.YEAR)           // 获取年份
+        val month = ca.get(Calendar.MONTH)         // 获取月份
+        val day = ca.get(Calendar.DATE)            // 获取日
+        val minute = ca.get(Calendar.MINUTE)       // 分
+        val hour = ca.get(Calendar.HOUR)           // 小时
+        val second = ca.get(Calendar.SECOND)       // 秒
+        return "" + year + (month + 1) + day + hour + minute + second+ (Math.random()*1000).toInt()
     }
 
+    /**
+    * Description: 判断当前时间是否为上午
+    * @author Junerver
+    * @date: 2022/2/9-10:18
+    * @Email: junerver@gmail.com
+    * @Version: v1.0
+    * @param
+    * @return
+    */
     fun isMorning(): Boolean {
-        return currentTimeMillis().dateToString("HH:mm")!!.substring(0..1).toInt() < 12
+        return currentTimeMillis().formatMillisTimestamp("HH").toInt() < 12
     }
 
     /**
@@ -395,7 +452,7 @@ object TimeUtils {
      * @return
      */
     fun timeToInt(): Int {
-        return currentTimeMillis().dateToString("HHmm")!!.toInt()
+        return currentTimeMillis().formatMillisTimestamp("HHmm").toInt()
     }
 
     /**
@@ -406,23 +463,31 @@ object TimeUtils {
      * @return
      */
     fun getTimeInDayByStr(time: String): Long {
-        var c = Calendar.getInstance()
+        val c = Calendar.getInstance()
         c.time = Date()
         c.set(
             c.get(Calendar.YEAR),
             c.get(Calendar.MONTH),
             c.get(Calendar.DAY_OF_MONTH), time.split(':')[0].toInt(), time.split(':')[1].toInt(), 0
         )
-        println(c.timeInMillis)
         return c.timeInMillis
     }
 
+    /**
+    * Description: 毫秒时间转换成时长字符
+    * @author Junerver
+    * @date: 2022/2/9-10:28
+    * @Email: junerver@gmail.com
+    * @Version: v1.0
+    * @param
+    * @return
+    */
     @JvmStatic
-    fun millis2FitTimeSpan(millis: Long, precision: Int): String? {
+    fun millis2FitTimeSpan(millis: Long, precision: Int=1): String? {
         var millis = millis
         var precision = precision
         if (precision <= 0) return null
-        precision = Math.min(precision, 5)
+        precision = min(precision, 5)
         val units = arrayOf("天", "小时", "分钟", "秒", "毫秒")
         if (millis == 0L) return "0" + units[precision - 1]
         val sb = StringBuilder()

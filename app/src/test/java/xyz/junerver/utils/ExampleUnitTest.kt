@@ -43,6 +43,13 @@ class ExampleUnitTest {
         set.add('a')
         println(set.size)
     }
+
+    @Test
+    fun testInfix() {
+        val list = emptyList<String>()
+        list + "str"
+
+    }
 }
 
 
