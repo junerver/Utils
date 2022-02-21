@@ -3,6 +3,7 @@ package xyz.junerver.utils
 import android.annotation.SuppressLint
 import xyz.junerver.utils.TimeUtils.TimeUnit.Companion.currentTimeUnit
 import xyz.junerver.utils.TimeUtils.TimeUnit.Companion.timeUnitMillis
+import xyz.junerver.utils.ex.safeConvertToLong
 import java.lang.StringBuilder
 import java.text.SimpleDateFormat
 import java.util.*
@@ -397,7 +398,7 @@ object TimeUtils {
      */
     fun String.formatMillisTimestamp(format: String = "yyyy-MM-dd HH:mm:ss"): String {
         return try {
-            val time = this.toLong()
+            val time = this.safeConvertToLong()
             time.formatMillisTimestamp(format)
         } catch (e: Exception) {
             "错误的时间戳！"

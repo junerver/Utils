@@ -43,5 +43,6 @@ class ExampleUnitTest {
         println(TimeUtils.getDate())
         println(isMorning())
         println(TimeUtils.getAge(1297217199L.timeUnitSeconds))
+        println(TimeUtils.TimeUnit.currentTimeUnit)
     }
 }

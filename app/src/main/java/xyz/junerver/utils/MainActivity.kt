@@ -23,6 +23,21 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
+        tvTestDsl.buildSpanString {
+            addText("这是第一个字符串"){
+                setColor("#009966")
+            }
+            addText("他有很多组成部分")
+            addText("颜色"){
+                setColor("#0099FF")
+            }
+            addText("可点击"){
+                onClick {
+                    Log.d(TAG, "这是dsl中的点击事件")
+                }
+            }
+        }
+
         Log.d(TAG, "metadata: ${getMetaData("value_key","def")}")
         btnEnable.setOnClickListener {
 
@@ -50,7 +65,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        etString.addTextChangedListenerDsl {
+        etString.addTextChangedListener(object :TextWatcher{
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                TODO("Not yet implemented")
+            }
+        })
+
+        etString.addTextChangedListener {
             afterTextChanged {
                 if (it.toString().length >= 4) {
                     KeyboardUtils.toggleSoftInput()
@@ -64,7 +93,6 @@ class MainActivity : AppCompatActivity() {
                     KeyboardUtils.toggleSoftInput()
                 }
             },
-
         )
 
         etString.addTextChangedListenerClosure { charSequence, i, i2, i3 ->

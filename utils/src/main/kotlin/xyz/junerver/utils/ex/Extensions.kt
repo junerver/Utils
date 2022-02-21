@@ -4,13 +4,17 @@ package xyz.junerver.utils.ex
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.text.Editable
-import android.text.TextWatcher
+import android.text.*
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.UnderlineSpan
 import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,6 +25,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -35,6 +40,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URLEncoder
 import java.util.regex.Pattern
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 
 //region convert扩展
@@ -181,6 +188,86 @@ fun checkAll(vararg all: EditText): Boolean {
 //endregion
 
 //region TextView 扩展
+
+//region SpanString
+interface DslSpannableStringBuilder {
+    fun addText(text: String, method: (DslSpanBuilder.() -> Unit)? = null)
+}
+
+interface DslSpanBuilder {
+    //是否使用下划线
+    fun setColor(color: String)
+    fun onClick(useUnderLine: Boolean = true, onClick: (View) -> Unit)
+}
+
+class DslSpannableStringBuilderImpl : DslSpannableStringBuilder {
+    private val builder = SpannableStringBuilder()
+    var lastIndex: Int = 0
+    var isClickable = false
+
+    override fun addText(text: String, method: (DslSpanBuilder.() -> Unit)?) {
+        val start = lastIndex
+        builder.append(text)
+        lastIndex += text.length
+        val spanBuilder = DslSpanBuilderImpl()
+        method?.let { spanBuilder.it() }
+        spanBuilder.apply {
+            onClickSpan?.let {
+                builder.setSpan(it, start, lastIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                isClickable = true
+            }
+            if (!useUnderLine) {
+                val noUnderlineSpan = NoUnderlineSpan()
+                builder.setSpan(noUnderlineSpan, start, lastIndex, Spanned.SPAN_MARK_MARK)
+            }
+            foregroundColorSpan?.let {
+                builder.setSpan(it, start, lastIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
+    }
+
+    fun build(): SpannableStringBuilder {
+        return builder
+    }
+}
+
+class DslSpanBuilderImpl : DslSpanBuilder {
+    var foregroundColorSpan: ForegroundColorSpan? = null
+    var onClickSpan: ClickableSpan? = null
+    var useUnderLine = true
+
+    override fun setColor(color: String) {
+        foregroundColorSpan = ForegroundColorSpan(Color.parseColor(color))
+    }
+
+    override fun onClick(useUnderLine: Boolean, onClick: (View) -> Unit) {
+        onClickSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                onClick(widget)
+            }
+        }
+        this.useUnderLine = useUnderLine
+    }
+}
+
+fun TextView.buildSpanString(method: DslSpannableStringBuilder.() -> Unit) {
+    val spanStringBuilderImpl = DslSpannableStringBuilderImpl()
+    spanStringBuilderImpl.method()
+    if (spanStringBuilderImpl.isClickable) {
+        movementMethod = LinkMovementMethod.getInstance()
+        highlightColor = context.getColorRes(android.R.color.transparent);
+    }
+    text = spanStringBuilderImpl.build()
+}
+
+class NoUnderlineSpan : UnderlineSpan() {
+    override fun updateDrawState(ds: TextPaint) {
+        ds.color = ds.linkColor
+        ds.isUnderlineText = false
+    }
+}
+//endregion
+
 fun TextView.drawableLeft(@DrawableRes id: Int) {
     val d = context.getDrawableRes(id)
     d.setBounds(0, 0, d.minimumWidth, d.minimumHeight)
@@ -207,14 +294,15 @@ fun TextView.drawableTop(@DrawableRes id: Int) {
 
 
 //region DSL实现的监听器
-fun TextView.addTextChangedListenerDsl(init: TextChangedListenerDsl.() -> Unit) {
-    val listener = TextChangedListenerDsl()
+fun TextView.addTextChangedListener(init: TextWatcherDslImpl.() -> Unit) {
+    val listener = TextWatcherDslImpl()
     listener.init()
     this.addTextChangedListener(listener)
 }
 
-class TextChangedListenerDsl : TextWatcher {
+class TextWatcherDslImpl : TextWatcher {
 
+    //原接口对应的kotlin函数对象
     private var afterTextChanged: ((Editable?) -> Unit)? = null
 
     private var beforeTextChanged: ((CharSequence?, Int, Int, Int) -> Unit)? = null
@@ -222,7 +310,7 @@ class TextChangedListenerDsl : TextWatcher {
     private var onTextChanged: ((CharSequence?, Int, Int, Int) -> Unit)? = null
 
     /**
-     * DSL方法
+     * DSL中使用的函数，一般保持同名即可
      */
     fun afterTextChanged(method: (Editable?) -> Unit) {
         afterTextChanged = method
@@ -237,7 +325,7 @@ class TextChangedListenerDsl : TextWatcher {
     }
 
     /**
-     * 原始方法
+     * 实现原接口的函数
      */
     override fun afterTextChanged(s: Editable?) {
         afterTextChanged?.invoke(s)
@@ -250,10 +338,8 @@ class TextChangedListenerDsl : TextWatcher {
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         onTextChanged?.invoke(s, start, before, count)
     }
-
 }
 //endregion
-
 
 //region 闭包实现的监听器
 inline fun TextView.addTextChangedListenerClosure(
@@ -263,21 +349,15 @@ inline fun TextView.addTextChangedListenerClosure(
 ) {
     val listener = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {
-            println("afterTextChanged")
             afterTextChanged.invoke(s)
-            println("afterTextChanged--end")
         }
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            println("beforeTextChanged")
             beforeTextChanged.invoke(s, start, count, after)
-            println("beforeTextChanged--end")
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            println("onTextChanged")
             onTextChanged.invoke(s, start, before, count)
-            println("onTextChanged--end")
         }
     }
     this.addTextChangedListener(listener)
@@ -456,6 +536,14 @@ fun String.padRight(len: Int, ch: Char): String {
     return String(charr)
 }
 
+@ExperimentalContracts
+fun String?.isNotNullOrEmpty(): Boolean {
+    contract {
+        returns(true) implies (this@isNotNullOrEmpty != null)
+    }
+    return this != null && !this.trim().equals("null", true) && this.trim().isNotEmpty()
+}
+
 //endregion
 
 //region Json & Gson
@@ -491,7 +579,7 @@ inline fun <reified T> String.toBean(
 
 //region context扩展
 fun Context.getDrawableRes(@DrawableRes id: Int): Drawable {
-    return ContextCompat.getDrawable(this, id)!!
+    return AppCompatResources.getDrawable(this, id)!!
 }
 
 fun Context.getColorRes(@ColorRes id: Int): Int {
@@ -640,15 +728,15 @@ fun Context.getUriForFile(file: File): Uri {
 
 
 /**
-* Description: 获取manifest文件中的metadata对象数据
-* @author Junerver
-* @date: 2021/2/8-10:17
-* @Email: junerver@gmail.com
-* @Version: v1.0
-* @param key  meta-data 中的android:name
-* @param def 当没有取到该字段值时的缺省值
-* @return
-*/
+ * Description: 获取manifest文件中的metadata对象数据
+ * @author Junerver
+ * @date: 2021/2/8-10:17
+ * @Email: junerver@gmail.com
+ * @Version: v1.0
+ * @param key  meta-data 中的android:name
+ * @param def 当没有取到该字段值时的缺省值
+ * @return
+ */
 inline fun <reified T> Context.getMetaData(key: String, def: T): T {
     val applicationInfo =
         this.packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
@@ -732,10 +820,12 @@ object KitUtil {
 //region 带参数的单例封装
 /**
  * 使用方法：
- * class SomeSingleton{
- *   companion object {
- *       val instance: SomeSingleton by lazy { SomeSingleton() }
- *   }
+ * class WorkSingleton private constructor(context: Context) {
+ *     init {
+ *         // Init using context argument
+ *     }
+ *
+ *     companion object : SingletonHolder<WorkSingleton, Context>(::WorkSingleton)
  * }
  */
 open class SingletonHolder<out T, in A>(creator: (A) -> T) {

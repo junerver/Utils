@@ -18,8 +18,8 @@ class ExampleUnitTest {
 
 //        println(SslUtils.getSslSocketFactory().sslSocketFactory)
 
-        assertEquals("sos".upperFirstLetter(),"Sos")
-        FileUtils.copy("D:\\ftp_root\\test\\ToastUtil.kt","D:\\ftp_root\\test1") { scr, dest ->
+        assertEquals("sos".upperFirstLetter(), "Sos")
+        FileUtils.copy("D:\\ftp_root\\test\\ToastUtil.kt", "D:\\ftp_root\\test1") { scr, dest ->
             println("存在目标文件 $scr _ $dest")
             true
         }
@@ -49,6 +49,30 @@ class ExampleUnitTest {
         val list = emptyList<String>()
         list + "str"
 
+    }
+
+    @Test
+    fun testInline() {
+//        testClosure {
+//            return
+//        }
+        val counter = fun(): () -> Int {
+            var counter = 0
+            return fun(): Int {
+                return counter++
+            }
+        }
+        val other = counter()
+        println(other())
+        println(other())
+        println(other())
+
+    }
+
+    private inline fun testClosure(test: (String) -> String) {
+        println("step 1")
+        println(test("step test"))
+        println("step 2")
     }
 }
 

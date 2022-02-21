@@ -9,6 +9,17 @@
     tools:context="xyz.junerver.utils.MainActivity">
 
     <TextView
+        android:id="@+id/tvTestDsl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="t"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.182" />
+
+    <TextView
         android:id="@+id/tvContent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,8 +32,8 @@
 
     <TextView
         android:id="@+id/tvTwo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="17dp"
+        android:layout_height="19dp"
         android:text="two"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
