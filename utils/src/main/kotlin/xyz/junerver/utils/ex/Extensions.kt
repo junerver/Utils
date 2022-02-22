@@ -12,9 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.text.*
 import android.text.method.LinkMovementMethod
-import android.text.style.ClickableSpan
-import android.text.style.ForegroundColorSpan
-import android.text.style.UnderlineSpan
+import android.text.style.*
 import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
@@ -25,6 +23,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import androidx.annotation.Size
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -191,17 +190,14 @@ fun checkAll(vararg all: EditText): Boolean {
 
 //region SpanString
 interface DslSpannableStringBuilder {
+    //增加一段文字
     fun addText(text: String, method: (DslSpanBuilder.() -> Unit)? = null)
 }
 
-interface DslSpanBuilder {
-    //是否使用下划线
-    fun setColor(color: String)
-    fun onClick(useUnderLine: Boolean = true, onClick: (View) -> Unit)
-}
-
-class DslSpannableStringBuilderImpl : DslSpannableStringBuilder {
+class DslSpannableStringBuilderImpl(private val textView: TextView) : DslSpannableStringBuilder {
     private val builder = SpannableStringBuilder()
+
+    //记录上次添加文字后最后的索引值
     var lastIndex: Int = 0
     var isClickable = false
 
@@ -209,7 +205,7 @@ class DslSpannableStringBuilderImpl : DslSpannableStringBuilder {
         val start = lastIndex
         builder.append(text)
         lastIndex += text.length
-        val spanBuilder = DslSpanBuilderImpl()
+        val spanBuilder = DslSpanBuilderImpl(textView)
         method?.let { spanBuilder.it() }
         spanBuilder.apply {
             onClickSpan?.let {
@@ -223,6 +219,15 @@ class DslSpannableStringBuilderImpl : DslSpannableStringBuilder {
             foregroundColorSpan?.let {
                 builder.setSpan(it, start, lastIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
+            backgroundColorSpan?.let {
+                builder.setSpan(it, start, lastIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+            styleSpan?.let {
+                builder.setSpan(it, start, lastIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+            imageSpan?.let {
+                builder.setSpan(it, start, start, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+            }
         }
     }
 
@@ -231,13 +236,57 @@ class DslSpannableStringBuilderImpl : DslSpannableStringBuilder {
     }
 }
 
-class DslSpanBuilderImpl : DslSpanBuilder {
+interface DslSpanBuilder {
+    //设置文字颜色
+    fun setForegroundColor(@Size(min = 1) colorString: String)
+    fun setForegroundColor(@ColorRes colorId: Int)
+
+    //设置文字背景色
+    fun setBackgroundColor(@Size(min = 1) colorString: String)
+    fun setBackgroundColor(@ColorRes colorId: Int)
+
+    //在文字左边增加图标
+    fun setDrawable(@DrawableRes drawableId: Int)
+
+    //设置文字样式
+    fun setStyle(style: Int)
+
+    //设置点击事件
+    fun onClick(useUnderLine: Boolean = true, onClick: (View) -> Unit)
+}
+
+class DslSpanBuilderImpl(private val textView:TextView) : DslSpanBuilder {
     var foregroundColorSpan: ForegroundColorSpan? = null
+    var backgroundColorSpan: BackgroundColorSpan? = null
+    var styleSpan: StyleSpan? = null
     var onClickSpan: ClickableSpan? = null
+    var imageSpan: ImageSpan? = null
     var useUnderLine = true
 
-    override fun setColor(color: String) {
-        foregroundColorSpan = ForegroundColorSpan(Color.parseColor(color))
+    override fun setForegroundColor(@Size(min = 1) colorString: String) {
+        foregroundColorSpan = ForegroundColorSpan(Color.parseColor(colorString))
+    }
+
+    override fun setForegroundColor(@ColorRes colorId: Int) {
+        foregroundColorSpan = ForegroundColorSpan(textView.context.getColorRes(colorId))
+    }
+
+    override fun setBackgroundColor(@Size(min = 1) colorString: String) {
+        backgroundColorSpan = BackgroundColorSpan(Color.parseColor(colorString))
+    }
+
+    override fun setBackgroundColor(@ColorRes colorId: Int) {
+        backgroundColorSpan = BackgroundColorSpan(textView.context.getColorRes(colorId))
+    }
+
+    override fun setDrawable(drawableId: Int) {
+        val drawable: Drawable = textView.context.getDrawableRes(drawableId)
+        drawable.setBounds(0, 0, textView.lineHeight, textView.lineHeight)
+        imageSpan =ImageSpan(drawable,1)
+    }
+
+    override fun setStyle(style: Int) {
+        styleSpan = StyleSpan(style)
     }
 
     override fun onClick(useUnderLine: Boolean, onClick: (View) -> Unit) {
@@ -250,21 +299,21 @@ class DslSpanBuilderImpl : DslSpanBuilder {
     }
 }
 
-fun TextView.buildSpanString(method: DslSpannableStringBuilder.() -> Unit) {
-    val spanStringBuilderImpl = DslSpannableStringBuilderImpl()
-    spanStringBuilderImpl.method()
-    if (spanStringBuilderImpl.isClickable) {
-        movementMethod = LinkMovementMethod.getInstance()
-        highlightColor = context.getColorRes(android.R.color.transparent);
-    }
-    text = spanStringBuilderImpl.build()
-}
-
 class NoUnderlineSpan : UnderlineSpan() {
     override fun updateDrawState(ds: TextPaint) {
         ds.color = ds.linkColor
         ds.isUnderlineText = false
     }
+}
+
+fun TextView.buildSpannableString(init: DslSpannableStringBuilder.() -> Unit) {
+    val spanStringBuilderImpl = DslSpannableStringBuilderImpl(this)
+    spanStringBuilderImpl.init()
+    if (spanStringBuilderImpl.isClickable) {
+        movementMethod = LinkMovementMethod.getInstance()
+        highlightColor = context.getColorRes(android.R.color.transparent);
+    }
+    text = spanStringBuilderImpl.build()
 }
 //endregion
 

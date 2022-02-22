@@ -1,5 +1,6 @@
 package xyz.junerver.utils
 
+import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -23,17 +24,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        tvTestDsl.buildSpanString {
-            addText("这是第一个字符串"){
-                setColor("#009966")
+        tvTestDsl.buildSpannableString {
+            addText("我已详细阅读并同意"){
+                setBackgroundColor("#FF9900")
+                setStyle(Typeface.BOLD_ITALIC)
             }
-            addText("他有很多组成部分")
-            addText("颜色"){
-                setColor("#0099FF")
-            }
-            addText("可点击"){
-                onClick {
-                    Log.d(TAG, "这是dsl中的点击事件")
+            addText("《隐私政策》"){
+                setForegroundColor("#0099FF")
+                setDrawable(R.drawable.icon_wechat)
+                onClick(false) {
+                    Log.d(TAG, "点击了隐私政策！")
                 }
             }
         }
