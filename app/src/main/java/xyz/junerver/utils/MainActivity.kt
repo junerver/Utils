@@ -7,6 +7,7 @@ import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.text.method.DigitsKeyListener
+import android.text.style.DynamicDrawableSpan
 import android.util.Log
 import com.junerver.utils.R
 import kotlinx.android.synthetic.main.activity_main.*
@@ -28,7 +29,12 @@ class MainActivity : AppCompatActivity() {
             addText("我已详细阅读并同意"){
                 setBackgroundColor("#FF9900")
                 setStyle(Typeface.BOLD_ITALIC)
-                setDrawableRight(R.drawable.icon_dingding)
+                userUnderLine()
+                useStrikethrough()
+                setDrawableRight(R.drawable.icon_dingding,DynamicDrawableSpan.ALIGN_CENTER)
+            }
+            addText("打电话"){
+                asURL("tel:10086")
             }
             addText("《隐私政策》"){
                 setForegroundColor("#0099FF")

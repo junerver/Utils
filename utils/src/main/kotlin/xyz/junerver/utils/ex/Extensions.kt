@@ -4,7 +4,8 @@ package xyz.junerver.utils.ex
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Color
+import android.graphics.*
+import android.graphics.Paint.FontMetricsInt
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
@@ -210,7 +211,11 @@ class DslSpannableStringBuilderImpl(private val textView: TextView) : DslSpannab
         val start = lastIndex
         spanBuilder.imageSpan?.let {
             //添加了图片需要根据左右添加一个空字符
-            addText = if (spanBuilder.drawableLeft) text.padRight(text.length + 1, ' ') else text.padLeft(text.length + 1, ' ')
+            addText =
+                if (spanBuilder.drawableLeft) text.padRight(text.length + 1, ' ') else text.padLeft(
+                    text.length + 1,
+                    ' '
+                )
         }
         builder.append(addText)
         lastIndex += addText.length
@@ -257,10 +262,29 @@ interface DslSpanBuilder {
     fun setBackgroundColor(@ColorRes colorId: Int)
 
     //在文字左边增加图标
-    fun setDrawableLeft(@DrawableRes drawableId: Int)
+    fun setDrawableLeft(
+        @DrawableRes drawableId: Int,
+        alignment: Int = DynamicDrawableSpan.ALIGN_BASELINE
+    )
+
+    fun setDrawableLeft(drawable: Drawable, alignment: Int = DynamicDrawableSpan.ALIGN_BASELINE)
 
     //在文字右边增加图标
-    fun setDrawableRight(@DrawableRes drawableId: Int)
+    fun setDrawableRight(
+        @DrawableRes drawableId: Int,
+        alignment: Int = DynamicDrawableSpan.ALIGN_BASELINE
+    )
+
+    fun setDrawableRight(drawable: Drawable, alignment: Int = DynamicDrawableSpan.ALIGN_BASELINE)
+
+    //下划线
+    fun userUnderLine()
+
+    //删除线
+    fun useStrikethrough()
+
+    //文字作为URLspan
+    fun asURL(url: String)
 
     //设置文字样式
     fun setStyle(style: Int)
@@ -275,6 +299,9 @@ class DslSpanBuilderImpl(private val textView: TextView) : DslSpanBuilder {
     var styleSpan: StyleSpan? = null
     var onClickSpan: ClickableSpan? = null
     var imageSpan: ImageSpan? = null
+    var underlineSpan: UnderlineSpan? = null
+    var strikethroughSpan: StrikethroughSpan? = null
+    var urlSpan: URLSpan? = null
     var useUnderLine = true
     internal val spanList = mutableListOf<CharacterStyle?>()
 
@@ -301,24 +328,63 @@ class DslSpanBuilderImpl(private val textView: TextView) : DslSpanBuilder {
         spanList.add(backgroundColorSpan)
     }
 
-    private fun setDrawable(drawableId: Int, left: Boolean = true) {
+    private fun setDrawable(
+        drawableId: Int,
+        left: Boolean = true,
+        alignment: Int = DynamicDrawableSpan.ALIGN_BASELINE
+    ) {
         drawableLeft = left
         val drawable: Drawable = textView.context.getDrawableRes(drawableId)
         drawable.setBounds(0, 0, textView.lineHeight, textView.lineHeight)
-        imageSpan = ImageSpan(drawable, 1)
+        imageSpan = ImageSpan(drawable, alignment)
+//        imageSpan = VerticalImageSpan(textView.context,drawableId, alignment)
     }
 
-    override fun setDrawableLeft(drawableId: Int) {
-        setDrawable(drawableId)
+    private fun setDrawable(
+        drawable: Drawable,
+        left: Boolean = true,
+        alignment: Int = DynamicDrawableSpan.ALIGN_BASELINE
+    ) {
+        drawableLeft = left
+        imageSpan = ImageSpan(drawable, alignment)
     }
 
-    override fun setDrawableRight(drawableId: Int) {
-        setDrawable(drawableId, false)
+    override fun setDrawableLeft(drawableId: Int, alignment: Int) {
+        setDrawable(drawableId, alignment = alignment)
+    }
+
+    override fun setDrawableLeft(drawable: Drawable, alignment: Int) {
+        setDrawable(drawable, alignment = alignment)
+    }
+
+    override fun setDrawableRight(drawableId: Int, alignment: Int) {
+        setDrawable(drawableId, false, alignment)
+    }
+
+    override fun setDrawableRight(drawable: Drawable, alignment: Int) {
+        setDrawable(drawable, false, alignment)
+    }
+
+    override fun userUnderLine() {
+        underlineSpan = UnderlineSpan()
+        spanList.add(underlineSpan)
+    }
+
+    override fun useStrikethrough() {
+        strikethroughSpan = StrikethroughSpan()
+        spanList.add(strikethroughSpan)
+    }
+
+    override fun asURL(url: String) {
+        urlSpan = URLSpan(url)
+        spanList.add(urlSpan)
     }
 
     override fun setStyle(style: Int) {
-        styleSpan = StyleSpan(style)
-        spanList.add(styleSpan)
+        if (style in Typeface.NORMAL..Typeface.BOLD_ITALIC) {
+            styleSpan = StyleSpan(style)
+            spanList.add(styleSpan)
+        }
     }
 
     override fun onClick(useUnderLine: Boolean, onClick: (View) -> Unit) {
@@ -336,6 +402,42 @@ class NoUnderlineSpan : UnderlineSpan() {
     override fun updateDrawState(ds: TextPaint) {
         ds.color = ds.linkColor
         ds.isUnderlineText = false
+    }
+}
+
+class VerticalImageSpan(context: Context, resourceId: Int, verticalAlignment: Int) :
+    ImageSpan(context, resourceId, verticalAlignment) {
+    override fun draw(canvas: Canvas, text: CharSequence?, start: Int, end: Int, x: Float, top: Int, y: Int, bottom: Int, paint: Paint
+    ) {
+        val b = drawable
+        canvas.save()
+        var transY = 0
+        //获得将要显示的文本高度 - 图片高度除2 = 居中位置+top(换行情况)
+        transY = (bottom - top - b.bounds.bottom) / 2 + top
+        //偏移画布后开始绘制
+        canvas.translate(x, transY.toFloat())
+        b.draw(canvas)
+        canvas.restore()
+    }
+
+    override fun getSize(
+        paint: Paint, text: CharSequence?, start: Int, end: Int, fm: FontMetricsInt?
+    ): Int {
+        val d = drawable
+        val rect = d.bounds
+        if (fm != null) {
+            val fmPaint = paint.fontMetricsInt
+            //获得文字、图片高度
+            val fontHeight = fmPaint.bottom - fmPaint.top
+            val drHeight = rect.bottom - rect.top
+            val top = drHeight / 2 - fontHeight / 4
+            val bottom = drHeight / 2 + fontHeight / 4
+            fm.ascent = -bottom
+            fm.top = -bottom
+            fm.bottom = top
+            fm.descent = top
+        }
+        return rect.right
     }
 }
 
