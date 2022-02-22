@@ -194,39 +194,50 @@ interface DslSpannableStringBuilder {
     fun addText(text: String, method: (DslSpanBuilder.() -> Unit)? = null)
 }
 
+
 class DslSpannableStringBuilderImpl(private val textView: TextView) : DslSpannableStringBuilder {
     private val builder = SpannableStringBuilder()
 
     //记录上次添加文字后最后的索引值
-    var lastIndex: Int = 0
+    private var lastIndex: Int = 0
     var isClickable = false
 
     override fun addText(text: String, method: (DslSpanBuilder.() -> Unit)?) {
-        val start = lastIndex
-        builder.append(text)
-        lastIndex += text.length
+        var addText = text
         val spanBuilder = DslSpanBuilderImpl(textView)
         method?.let { spanBuilder.it() }
+
+        val start = lastIndex
+        spanBuilder.imageSpan?.let {
+            //添加了图片需要根据左右添加一个空字符
+            addText = if (spanBuilder.drawableLeft) text.padRight(text.length + 1, ' ') else text.padLeft(text.length + 1, ' ')
+        }
+        builder.append(addText)
+        lastIndex += addText.length
+
         spanBuilder.apply {
-            onClickSpan?.let {
-                builder.setSpan(it, start, lastIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                isClickable = true
-            }
+            if (onClickSpan != null) isClickable = true
             if (!useUnderLine) {
                 val noUnderlineSpan = NoUnderlineSpan()
                 builder.setSpan(noUnderlineSpan, start, lastIndex, Spanned.SPAN_MARK_MARK)
             }
-            foregroundColorSpan?.let {
-                builder.setSpan(it, start, lastIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            }
-            backgroundColorSpan?.let {
-                builder.setSpan(it, start, lastIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            }
-            styleSpan?.let {
+            spanList.forEach {
                 builder.setSpan(it, start, lastIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
             imageSpan?.let {
-                builder.setSpan(it, start, start, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+                if (spanBuilder.drawableLeft) {
+                    builder.setSpan(it, start, start + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+                } else {
+                    if (lastIndex >= 1) {
+                        builder.setSpan(
+                            it,
+                            lastIndex - 1,
+                            lastIndex,
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                    }
+                }
             }
         }
     }
@@ -246,7 +257,10 @@ interface DslSpanBuilder {
     fun setBackgroundColor(@ColorRes colorId: Int)
 
     //在文字左边增加图标
-    fun setDrawable(@DrawableRes drawableId: Int)
+    fun setDrawableLeft(@DrawableRes drawableId: Int)
+
+    //在文字右边增加图标
+    fun setDrawableRight(@DrawableRes drawableId: Int)
 
     //设置文字样式
     fun setStyle(style: Int)
@@ -255,38 +269,56 @@ interface DslSpanBuilder {
     fun onClick(useUnderLine: Boolean = true, onClick: (View) -> Unit)
 }
 
-class DslSpanBuilderImpl(private val textView:TextView) : DslSpanBuilder {
+class DslSpanBuilderImpl(private val textView: TextView) : DslSpanBuilder {
     var foregroundColorSpan: ForegroundColorSpan? = null
     var backgroundColorSpan: BackgroundColorSpan? = null
     var styleSpan: StyleSpan? = null
     var onClickSpan: ClickableSpan? = null
     var imageSpan: ImageSpan? = null
     var useUnderLine = true
+    internal val spanList = mutableListOf<CharacterStyle?>()
+
+    //添加的 drawable 默认位于文字左侧
+    var drawableLeft = true
 
     override fun setForegroundColor(@Size(min = 1) colorString: String) {
         foregroundColorSpan = ForegroundColorSpan(Color.parseColor(colorString))
+        spanList.add(foregroundColorSpan)
     }
 
     override fun setForegroundColor(@ColorRes colorId: Int) {
         foregroundColorSpan = ForegroundColorSpan(textView.context.getColorRes(colorId))
+        spanList.add(foregroundColorSpan)
     }
 
     override fun setBackgroundColor(@Size(min = 1) colorString: String) {
         backgroundColorSpan = BackgroundColorSpan(Color.parseColor(colorString))
+        spanList.add(backgroundColorSpan)
     }
 
     override fun setBackgroundColor(@ColorRes colorId: Int) {
         backgroundColorSpan = BackgroundColorSpan(textView.context.getColorRes(colorId))
+        spanList.add(backgroundColorSpan)
     }
 
-    override fun setDrawable(drawableId: Int) {
+    private fun setDrawable(drawableId: Int, left: Boolean = true) {
+        drawableLeft = left
         val drawable: Drawable = textView.context.getDrawableRes(drawableId)
         drawable.setBounds(0, 0, textView.lineHeight, textView.lineHeight)
-        imageSpan =ImageSpan(drawable,1)
+        imageSpan = ImageSpan(drawable, 1)
+    }
+
+    override fun setDrawableLeft(drawableId: Int) {
+        setDrawable(drawableId)
+    }
+
+    override fun setDrawableRight(drawableId: Int) {
+        setDrawable(drawableId, false)
     }
 
     override fun setStyle(style: Int) {
         styleSpan = StyleSpan(style)
+        spanList.add(styleSpan)
     }
 
     override fun onClick(useUnderLine: Boolean, onClick: (View) -> Unit) {
@@ -295,6 +327,7 @@ class DslSpanBuilderImpl(private val textView:TextView) : DslSpanBuilder {
                 onClick(widget)
             }
         }
+        spanList.add(onClickSpan)
         this.useUnderLine = useUnderLine
     }
 }
@@ -311,7 +344,7 @@ fun TextView.buildSpannableString(init: DslSpannableStringBuilder.() -> Unit) {
     spanStringBuilderImpl.init()
     if (spanStringBuilderImpl.isClickable) {
         movementMethod = LinkMovementMethod.getInstance()
-        highlightColor = context.getColorRes(android.R.color.transparent);
+        highlightColor = context.getColorRes(android.R.color.transparent)
     }
     text = spanStringBuilderImpl.build()
 }
@@ -570,7 +603,7 @@ fun String.padLeft(len: Int, ch: Char): String {
 
 /**
  * @作者 尧
- * @功能 String右对齐
+ * @功能 String右对齐 向左侧补充字符
  */
 fun String.padRight(len: Int, ch: Char): String {
     val diff = len - this.length

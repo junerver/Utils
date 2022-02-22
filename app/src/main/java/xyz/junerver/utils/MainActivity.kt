@@ -28,10 +28,11 @@ class MainActivity : AppCompatActivity() {
             addText("我已详细阅读并同意"){
                 setBackgroundColor("#FF9900")
                 setStyle(Typeface.BOLD_ITALIC)
+                setDrawableRight(R.drawable.icon_dingding)
             }
             addText("《隐私政策》"){
                 setForegroundColor("#0099FF")
-                setDrawable(R.drawable.icon_wechat)
+                setDrawableLeft(R.drawable.icon_wechat)
                 onClick(false) {
                     Log.d(TAG, "点击了隐私政策！")
                 }
