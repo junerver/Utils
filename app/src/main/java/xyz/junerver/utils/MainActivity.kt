@@ -1,5 +1,8 @@
 package xyz.junerver.utils
 
+import android.Manifest
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,6 +12,8 @@ import android.text.TextWatcher
 import android.text.method.DigitsKeyListener
 import android.text.style.DynamicDrawableSpan
 import android.util.Log
+import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doOnTextChanged
 import com.junerver.utils.R
 import kotlinx.android.synthetic.main.activity_main.*
 import xyz.junerver.utils.ex.*
@@ -19,50 +24,56 @@ private const val TAG = "MainActivity"
 class MainActivity : AppCompatActivity() {
 
     var mLastFile = ""
-
+    lateinit var activity: MainActivity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        activity = this
 
         tvTestDsl.buildSpannableString {
-            addText("我已详细阅读并同意"){
+            "这是另一个测试".asSpannableString {
+                setBackgroundColor("#ff0099")
+            }
+            addText("我已详细阅读并同意") {
                 setBackgroundColor("#FF9900")
                 setStyle(Typeface.BOLD_ITALIC)
                 userUnderLine()
                 useStrikethrough()
-                setDrawableRight(R.drawable.icon_dingding,DynamicDrawableSpan.ALIGN_CENTER)
+                setDrawableRight(R.drawable.icon_dingding, DynamicDrawableSpan.ALIGN_CENTER)
             }
-            addText("打电话"){
+            addText("打电话") {
                 asURL("tel:10086")
             }
-            addText("《隐私政策》"){
+            addText("《隐私政策》") {
                 setForegroundColor("#0099FF")
                 setDrawableLeft(R.drawable.icon_wechat)
                 onClick(false) {
-                    Log.d(TAG, "点击了隐私政策！")
+
                 }
             }
         }
 
-        Log.d(TAG, "metadata: ${getMetaData("value_key","def")}")
+        Log.d(TAG, "metadata: ${getMetaData("value_key", "def")}")
         btnEnable.setOnClickListener {
 
-//            PermissionUtils.permission(Manifest.permission.READ_CALENDAR, Manifest.permission.RECORD_AUDIO)
-//
-//                .callback { isAllGranted, granted, deniedForever, denied ->
-//                    Log.d(TAG, "onCreate: \n$isAllGranted \n$granted \n$deniedForever \n$denied")
-//                }
-//                .request()
+            PermissionUtils.permission(
+                Manifest.permission.READ_CALENDAR,
+                Manifest.permission.RECORD_AUDIO
+            )
 
-//            invisibles(btnClick,btnToast)
+                .callback { isAllGranted, granted, deniedForever, denied ->
+                    Log.d(TAG, "onCreate: \n$isAllGranted \n$granted \n$deniedForever \n$denied")
+                }
+                .request()
+
+            invisibles(btnClick, btnToast)
 
             Log.d(TAG, "onCreate: ${etString.trimTextStr}")
 
         }
 
         //无效
-        etString.keyListener = object :DigitsKeyListener(Locale.CHINA){
+        etString.keyListener = object : DigitsKeyListener(Locale.CHINA) {
             override fun getInputType(): Int {
                 return InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_NORMAL
             }
@@ -72,21 +83,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        etString.addTextChangedListener(object :TextWatcher{
+        etString.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                TODO("Not yet implemented")
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                TODO("Not yet implemented")
             }
 
             override fun afterTextChanged(s: Editable?) {
-                TODO("Not yet implemented")
             }
         })
 
-        etString.addTextChangedListener {
+        etString.addTextChangedListenerDsl {
             afterTextChanged {
                 if (it.toString().length >= 4) {
                     KeyboardUtils.toggleSoftInput()
@@ -94,20 +102,26 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        etString.addTextChangedListenerClosure(
+        etString.addTextChangedListener(
             afterTextChanged = {
                 if (it.toString().length >= 4) {
                     KeyboardUtils.toggleSoftInput()
                 }
-            },
+            }
         )
+        etString.doOnTextChanged { charSequence: CharSequence?, i: Int, i1: Int, i2: Int ->
 
-        etString.addTextChangedListenerClosure { charSequence, i, i2, i3 ->
-            println("on call")
         }
+
 
         btnClick.setOnClickListener {
             KeyboardUtils.toggleSoftInput()
+            //切换横竖屏
+            requestedOrientation = if (activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            } else {
+                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
         }
 
     }

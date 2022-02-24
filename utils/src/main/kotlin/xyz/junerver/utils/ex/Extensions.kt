@@ -203,6 +203,10 @@ class DslSpannableStringBuilderImpl(private val textView: TextView) : DslSpannab
     private var lastIndex: Int = 0
     var isClickable = false
 
+    fun String.asSpannableString(method: (DslSpanBuilder.() -> Unit)? = null) {
+        addText(this, method)
+    }
+
     override fun addText(text: String, method: (DslSpanBuilder.() -> Unit)?) {
         var addText = text
         val spanBuilder = DslSpanBuilderImpl(textView)
@@ -210,12 +214,12 @@ class DslSpannableStringBuilderImpl(private val textView: TextView) : DslSpannab
 
         val start = lastIndex
         spanBuilder.imageSpan?.let {
-            //添加了图片需要根据左右添加一个空字符
+            //添加了图片需要根据左右添加一个空格字符，用于给图片占位
             addText =
-                if (spanBuilder.drawableLeft) text.padRight(text.length + 1, ' ') else text.padLeft(
-                    text.length + 1,
-                    ' '
-                )
+                if (spanBuilder.drawableLeft)
+                    text.padRight(text.length + 1, ' ')
+                else
+                    text.padLeft(text.length + 1, ' ')
         }
         builder.append(addText)
         lastIndex += addText.length
@@ -226,9 +230,11 @@ class DslSpannableStringBuilderImpl(private val textView: TextView) : DslSpannab
                 val noUnderlineSpan = NoUnderlineSpan()
                 builder.setSpan(noUnderlineSpan, start, lastIndex, Spanned.SPAN_MARK_MARK)
             }
+            //循环处理所有span
             spanList.forEach {
                 builder.setSpan(it, start, lastIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
+            //图片特殊处理，图片是替换一段文字的占位
             imageSpan?.let {
                 if (spanBuilder.drawableLeft) {
                     builder.setSpan(it, start, start + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -407,7 +413,16 @@ class NoUnderlineSpan : UnderlineSpan() {
 
 class VerticalImageSpan(context: Context, resourceId: Int, verticalAlignment: Int) :
     ImageSpan(context, resourceId, verticalAlignment) {
-    override fun draw(canvas: Canvas, text: CharSequence?, start: Int, end: Int, x: Float, top: Int, y: Int, bottom: Int, paint: Paint
+    override fun draw(
+        canvas: Canvas,
+        text: CharSequence?,
+        start: Int,
+        end: Int,
+        x: Float,
+        top: Int,
+        y: Int,
+        bottom: Int,
+        paint: Paint
     ) {
         val b = drawable
         canvas.save()
@@ -441,7 +456,7 @@ class VerticalImageSpan(context: Context, resourceId: Int, verticalAlignment: In
     }
 }
 
-fun TextView.buildSpannableString(init: DslSpannableStringBuilder.() -> Unit) {
+fun TextView.buildSpannableString(init: DslSpannableStringBuilderImpl.() -> Unit) {
     val spanStringBuilderImpl = DslSpannableStringBuilderImpl(this)
     spanStringBuilderImpl.init()
     if (spanStringBuilderImpl.isClickable) {
@@ -478,7 +493,7 @@ fun TextView.drawableTop(@DrawableRes id: Int) {
 
 
 //region DSL实现的监听器
-fun TextView.addTextChangedListener(init: TextWatcherDslImpl.() -> Unit) {
+fun TextView.addTextChangedListenerDsl(init: TextWatcherDslImpl.() -> Unit) {
     val listener = TextWatcherDslImpl()
     listener.init()
     this.addTextChangedListener(listener)
@@ -526,6 +541,14 @@ class TextWatcherDslImpl : TextWatcher {
 //endregion
 
 //region 闭包实现的监听器
+/**
+ * Description: 此段代码存在官方实现 [androidx.core.widget.addTextChangedListener]
+ * @author Junerver
+ * @date: 2022/2/23-7:27
+ * @Email: junerver@gmail.com
+ * @Version: v1.0
+ */
+@Deprecated("core-ktx 存在相似方法")
 inline fun TextView.addTextChangedListenerClosure(
     crossinline afterTextChanged: (Editable?) -> Unit = {},
     crossinline beforeTextChanged: (CharSequence?, Int, Int, Int) -> Unit = { charSequence, start, count, after -> },
