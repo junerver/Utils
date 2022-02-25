@@ -29,10 +29,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         activity = this
-
+        Log.d(TAG, "onCreate: 我是生命周期")
         tvTestDsl.buildSpannableString {
             "这是另一个测试".asSpannableString {
                 setBackgroundColor("#ff0099")
+                onClick(false) {
+
+                }
             }
             addText("我已详细阅读并同意") {
                 setBackgroundColor("#FF9900")
@@ -47,8 +50,15 @@ class MainActivity : AppCompatActivity() {
             addText("《隐私政策》") {
                 setForegroundColor("#0099FF")
                 setDrawableLeft(R.drawable.icon_wechat)
-                onClick(false) {
-
+                onClick() {
+                    requestedOrientation =
+                        if (activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            //横屏 0  竖屏1
+                            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                        } else {
+                            //未定义
+                            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                        }
                 }
             }
         }
@@ -123,6 +133,13 @@ class MainActivity : AppCompatActivity() {
                 ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             }
         }
-
+        
+//        btnClick.setSingleClickListener{
+//            Log.d(TAG, "onCreate: 点击成功")
+//        }
+//
+//        btnClick2.setSingleClickListener{
+//            Log.d(TAG, "onCreate2: 点击成功")
+//        }
     }
 }

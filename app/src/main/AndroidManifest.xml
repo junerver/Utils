@@ -52,7 +52,9 @@
         <activity
             android:name="xyz.junerver.utils.MainActivity"
             android:windowSoftInputMode="adjustUnspecified|stateHidden"
-            android:exported="true">
+            android:exported="true"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
