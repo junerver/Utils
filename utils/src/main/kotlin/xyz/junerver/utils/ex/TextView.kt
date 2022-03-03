@@ -105,8 +105,14 @@ class DslSpannableStringBuilderImpl(private val textView: TextView) : DslSpannab
     private var lastIndex: Int = 0
     var isClickable = false
 
+    //内部扩展函数，在这个作用域外无法调用
     fun String.asSpannableString(method: (DslSpanBuilder.() -> Unit)? = null) {
         addText(this, method)
+    }
+
+    //重载操作符
+    operator fun String.invoke(block: (DslSpanBuilder.() -> Unit)? = null) {
+        this.asSpannableString(block)
     }
 
     override fun addText(text: String, method: (DslSpanBuilder.() -> Unit)?) {
@@ -191,10 +197,10 @@ interface DslSpanBuilder {
     fun asURL(url: String)
 
     /**
-    * Description: 设置文字样式
-    * @author Junerver
-    * @param style [Typeface.NORMAL] [Typeface.BOLD] [Typeface.ITALIC] [Typeface.BOLD_ITALIC]
-    */
+     * Description: 设置文字样式
+     * @author Junerver
+     * @param style [Typeface.NORMAL] [Typeface.BOLD] [Typeface.ITALIC] [Typeface.BOLD_ITALIC]
+     */
     fun setStyle(style: Int)
 
     /**

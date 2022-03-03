@@ -4,27 +4,18 @@ package xyz.junerver.utils.ex
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.*
-import android.graphics.Paint.FontMetricsInt
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.text.*
-import android.text.method.LinkMovementMethod
-import android.text.style.*
 import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.EditText
-import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import androidx.annotation.Size
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -264,12 +255,12 @@ fun String.padLeft(len: Int, ch: Char): String {
     if (diff <= 0) {
         return this
     }
-    val charr = CharArray(len)
-    System.arraycopy(this.toCharArray(), 0, charr, 0, this.length)
+    val chArr = CharArray(len)
+    System.arraycopy(this.toCharArray(), 0, chArr, 0, this.length)
     for (i in this.length until len) {
-        charr[i] = ch
+        chArr[i] = ch
     }
-    return String(charr)
+    return String(chArr)
 }
 
 
@@ -282,12 +273,12 @@ fun String.padRight(len: Int, ch: Char): String {
     if (diff <= 0) {
         return this
     }
-    val charr = CharArray(len)
-    System.arraycopy(this.toCharArray(), 0, charr, diff, this.length)
+    val chArr = CharArray(len)
+    System.arraycopy(this.toCharArray(), 0, chArr, diff, this.length)
     for (i in 0 until diff) {
-        charr[i] = ch
+        chArr[i] = ch
     }
-    return String(charr)
+    return String(chArr)
 }
 
 @ExperimentalContracts

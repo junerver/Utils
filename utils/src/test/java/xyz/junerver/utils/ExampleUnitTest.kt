@@ -30,7 +30,7 @@ class ExampleUnitTest {
             true
         }
 
-        FileUtils.copy("","") { file: File, file1: File ->
+        FileUtils.copy("", "") { file: File, file1: File ->
             true
         }
     }
@@ -38,11 +38,19 @@ class ExampleUnitTest {
     @Test
     fun testTimeUtil() {
         val time = "1644372399000"
-        assertEquals("2022-02-09 10:06:39",time.formatMillisTimestamp())
-        println(TimeUtils.millis2FitTimeSpan(100000000,4))
+        assertEquals("2022-02-09 10:06:39", time.formatMillisTimestamp())
+        println(TimeUtils.millis2FitTimeSpan(100000000, 4))
         println(TimeUtils.getDate())
         println(isMorning())
         println(TimeUtils.getAge(1297217199L.timeUnitSeconds))
         println(TimeUtils.TimeUnit.currentTimeUnit)
+    }
+
+    @Test
+    fun testOpAndInfix() {
+        val list = mutableListOf("1", "2")
+        list += "3"
+        list + "3"
+
     }
 }

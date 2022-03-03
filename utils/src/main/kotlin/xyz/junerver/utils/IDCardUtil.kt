@@ -1,5 +1,6 @@
 package xyz.junerver.utils
 
+import xyz.junerver.utils.ex.x
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -345,17 +346,17 @@ object IDCardUtil {
         var card = idCard.replace("[\\(|\\)]".toRegex(), "")
         var sum: Int? = 0
         if (card.length == 9) {
-            sum = (card.substring(0, 1).toUpperCase().toCharArray()[0].toInt() - 55) * 9 + (card.substring(1, 2).toUpperCase().toCharArray()[0].toInt() - 55) * 8
+            sum = (card.substring(0, 1).uppercase().toCharArray()[0].toInt() - 55) * 9 + (card.substring(1, 2).toUpperCase().toCharArray()[0].toInt() - 55) * 8
             card = card.substring(1, 9)
         } else {
-            sum = 522 + (card.substring(0, 1).toUpperCase().toCharArray()[0].toInt() - 55) * 8
+            sum = 522 + (card.substring(0, 1).uppercase().toCharArray()[0].toInt() - 55) * 8
         }
         val mid = card.substring(1, 7)
         val end = card.substring(7, 8)
         val chars = mid.toCharArray()
         var iflag: Int? = 7
         for (c in chars) {
-            sum = sum!! + Integer.valueOf(c + "") * iflag!!
+            sum = sum!! + Integer.valueOf(c + "") x iflag!!
             iflag--
         }
         if (end.toUpperCase() == "A") {

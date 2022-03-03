@@ -1,6 +1,8 @@
 package xyz.junerver.utils
 
+import xyz.junerver.utils.ex.x
 import java.util.*
+import kotlin.math.roundToInt
 
 /**
  * Description: 顶级函数
@@ -23,7 +25,7 @@ fun dataFormat(total: Long): String {
         "$speedReal KB"
     } else {
         val mSpeed = speedReal / 1024.0
-        (Math.round(mSpeed * 100) / 100.0).toString() + " MB"
+        ((mSpeed x 100.0).roundToInt() / 100.0).toString() + " MB"
     }
     return result
 }

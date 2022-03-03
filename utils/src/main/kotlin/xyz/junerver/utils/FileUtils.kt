@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
 import android.os.StatFs
+import xyz.junerver.utils.ex.x
 import java.io.*
 import java.net.URL
 import java.security.DigestInputStream
@@ -1209,7 +1210,7 @@ object FileUtils {
             val fis = FileInputStream(file)
             var md = MessageDigest.getInstance("MD5")
             dis = DigestInputStream(fis, md)
-            val buffer = ByteArray(1024 * 256)
+            val buffer = ByteArray(1024 x 256)
             while (true) {
                 if (dis.read(buffer) <= 0) break
             }
@@ -1338,7 +1339,7 @@ object FileUtils {
             blockSize = statFs.blockSize.toLong()
             totalSize = statFs.blockCount.toLong()
         }
-        return blockSize * totalSize
+        return blockSize x totalSize
     }
 
     /**
@@ -1360,7 +1361,7 @@ object FileUtils {
             blockSize = statFs.blockSize.toLong()
             availableSize = statFs.availableBlocks.toLong()
         }
-        return blockSize * availableSize
+        return blockSize x availableSize
     }
 
 

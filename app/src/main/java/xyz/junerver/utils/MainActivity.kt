@@ -37,6 +37,11 @@ class MainActivity : AppCompatActivity() {
 
                 }
             }
+            "你甚至还可以这样用"{
+                setBackgroundColor("#ff0099")
+                onClick(false) {
+                }
+            }
             addText("我已详细阅读并同意") {
                 setBackgroundColor("#FF9900")
                 setStyle(Typeface.BOLD_ITALIC)
@@ -127,13 +132,14 @@ class MainActivity : AppCompatActivity() {
         btnClick.setOnClickListener {
             KeyboardUtils.toggleSoftInput()
             //切换横竖屏
-            requestedOrientation = if (activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-            } else {
-                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            }
+            requestedOrientation =
+                if (activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                } else {
+                    ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                }
         }
-        
+
 //        btnClick.setSingleClickListener{
 //            Log.d(TAG, "onCreate: 点击成功")
 //        }

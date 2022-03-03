@@ -2,6 +2,7 @@ package xyz.junerver.utils
 
 
 import xyz.junerver.utils.ex.padLeft
+import xyz.junerver.utils.ex.x
 import java.io.File
 import java.io.UnsupportedEncodingException
 import java.lang.IllegalArgumentException
@@ -38,7 +39,7 @@ fun MD5(str: String): String {
     }
     val encodedValue = md5.digest()
     val j = encodedValue.size
-    val finalValue = CharArray(j * 2)
+    val finalValue = CharArray(j x 2)
     var k = 0
     for (i in 0 until j) {
         val encoded = encodedValue[i]
