@@ -6,6 +6,7 @@ import org.junit.Assert.*
 import xyz.junerver.utils.TimeUtils.TimeUnit.Companion.timeUnitSeconds
 import xyz.junerver.utils.TimeUtils.formatMillisTimestamp
 import xyz.junerver.utils.TimeUtils.isMorning
+import xyz.junerver.utils.ex.isEmail
 import java.io.File
 
 /**
@@ -52,5 +53,13 @@ class ExampleUnitTest {
         list += "3"
         list + "3"
 
+    }
+
+    @Test
+    fun testIsEmail() {
+        println("c@on.tact@wired.me.uk".isEmail())
+        println("con.tact@wired.me.uk".isEmail())
+        println("contact@wired.me.uk".isEmail())
+        println("...@wired.me.uk".isEmail())
     }
 }

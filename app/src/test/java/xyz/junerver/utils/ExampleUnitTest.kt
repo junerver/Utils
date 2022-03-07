@@ -74,6 +74,40 @@ class ExampleUnitTest {
         println(test("step test"))
         println("step 2")
     }
+
+    @Test
+    fun testSealed() {
+        var c:Color = Color.Red()
+
+
+        when (c) {
+           is Color.Red->{
+               println("red")}
+           Color.Yellow->{
+                println("yellow")
+            }
+        }
+        c = Color.Yellow
+        when (c) {
+            is Color.Red->{
+                println("red")}
+            Color.Yellow -> TODO()
+        }
+    }
+
+    sealed class Color {
+        class Red : Color()
+        object Yellow:Color()
+    }
+
+
+    @Test
+    fun testSwap() {
+
+    }
+
+    class Person(var name:String)
+
 }
 
 
