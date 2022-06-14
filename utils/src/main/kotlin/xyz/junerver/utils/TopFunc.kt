@@ -63,7 +63,46 @@ fun groupByteArrayByLength(ba: ByteArray, length: Int): List<ByteArray> {
 fun getTotalPiece(total: Long, piece: Int): Int =
     if (total % piece > 0) (total / piece).toInt() + 1 else (total / piece).toInt()
 
+/**
+ * Description: 类似js的setInterval函数
+ * @author Junerver
+ * @date: 2022/6/14-13:43
+ * @Email: junerver@gmail.com
+ * @Version: v1.0
+ * @param block 循环的代码块
+ * @param period 循环的周期
+ * @param delay 延迟的时间
+ * @return
+ */
+fun setInterval(block: () -> Unit, period: Long, delay: Long = 0): Timer {
+    val timer = Timer()
+    timer.schedule(object : TimerTask() {
+        override fun run() {
+            block()
+        }
+    }, delay, period)
+    return timer
+}
 
+/**
+ * Description: 类似js的setTimeout函数
+ * @author Junerver
+ * @date: 2022/6/14-13:46
+ * @Email: junerver@gmail.com
+ * @Version: v1.0
+ * @param block 循环的代码块
+ * @param delay 延迟的时间
+ * @return
+ */
+fun setTimeout(block: () -> Unit, delay: Long): Timer {
+    val timer = Timer()
+    timer.schedule(object : TimerTask() {
+        override fun run() {
+            block()
+        }
+    }, delay)
+    return timer
+}
 
 inline fun <reified T> returnRandom(result: T): T? {
     val random = Math.random()
