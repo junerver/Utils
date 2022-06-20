@@ -18,15 +18,10 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.Size
 import androidx.core.content.ContextCompat
 
-/**
- * Description:
- * @author Junerver
- * date: 2022/2/25-8:56
- * Email: junerver@gmail.com
- * Version: v1.0
- */
+
 
 //region EditText 扩展
+
 val EditText.trimTextStr: String
     get() = this.text.toString().trim()
 
@@ -89,9 +84,10 @@ fun checkAll(vararg all: EditText): Boolean {
     }
     return true
 }
+
 //endregion
 
-//region TextView 扩展
+
 //region SpanString
 interface DslSpannableStringBuilder {
     //增加一段文字
@@ -460,6 +456,8 @@ inline fun TextView.addTextChangedListenerClosure(
 }
 //endregion
 
+
+//region TextView drawable 相关扩展
 fun TextView.drawableLeft(@DrawableRes id: Int) {
     val d = context.getDrawableRes(id)
     d.setBounds(0, 0, d.minimumWidth, d.minimumHeight)
@@ -483,6 +481,7 @@ fun TextView.drawableTop(@DrawableRes id: Int) {
     d.setBounds(0, 0, d.minimumWidth, d.minimumHeight)
     this.setCompoundDrawables(null, d, null, null)
 }
+//endregion
 
 /**
  * 修改TextView文字颜色
@@ -502,4 +501,3 @@ fun TextView.color(@ColorRes id: Int) {
 fun TextView.stringTrim(): String {
     return this.text.toString().trim()
 }
-//endregion

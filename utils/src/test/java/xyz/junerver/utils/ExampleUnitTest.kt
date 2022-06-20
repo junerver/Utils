@@ -1,5 +1,7 @@
 package xyz.junerver.utils
 
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -61,5 +63,44 @@ class ExampleUnitTest {
         println("con.tact@wired.me.uk".isEmail())
         println("contact@wired.me.uk".isEmail())
         println("...@wired.me.uk".isEmail())
+    }
+
+    @Test
+    fun testJsonBuilder(){
+        var jo = json {
+            "name" to "zhangsan"
+            val arr = arrayOf(1,2,3,4)
+            "keys" to arr.map {
+                json {
+                    "key" to it
+                    "index" to "学号：$it"
+                }
+            }.toTypedArray()
+            "info" to json {
+                "email" to "xxxx@mail.com"
+                "age" to 18
+                "sex" to '1'
+            }
+            "o" to {
+                "2" to "3"
+                "arr" to listOf<String>("1","2","3")
+            }
+        }
+        //验证字段名称
+        assertEquals("zhangsan",jo.getString("name"))
+        //验证JSONArray的长度
+        assertEquals(4, jo.optJSONArray("keys")?.length() ?: 0)
+        assertEquals(true,jo.get("info") is JSONObject)
+    }
+
+    @Test
+    fun testJsonArray(){
+        //创建root为 array的json
+        val ja = JSONArray(listOf(
+            json{"name" to "张三"},
+            json{"name" to "李四"},
+            json{"name" to "王五"},
+        ))
+        assertEquals(3,ja.length())
     }
 }
