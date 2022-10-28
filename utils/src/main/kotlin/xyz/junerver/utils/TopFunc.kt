@@ -1,7 +1,9 @@
 package xyz.junerver.utils
 
 import xyz.junerver.utils.ex.x
-import java.util.*
+import java.util.Timer
+import java.util.TimerTask
+import java.util.UUID
 import kotlin.math.roundToInt
 
 /**
@@ -112,4 +114,43 @@ inline fun <reified T> returnRandom(result: T): T? {
     } else {
         null
     }
+}
+
+/**
+ * Description: 读取BuildConfig中的配置，当项目分包时，
+ * 某些模块需要读取app中配置的buildConfig，这时就要通过该函数进行反射读取
+ * @author Junerver
+ * @date: 2022/10/28-9:45
+ * @Email: junerver@gmail.com
+ * @Version: v1.0
+ * @param packageName 项目包名（对应的是Manifest文件中的package）
+ * @param fieldName 字段名称
+ * @return
+ */
+fun getBuildConfigValue(packageName: String, fieldName: String): Any? {
+    try {
+        //package与applicationId不同 直接通过包名反射
+        val clazz = Class.forName("${packageName}.BuildConfig")
+        val field = clazz.getField(fieldName)
+        return field[null]
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return null
+}
+
+/**
+ * Description:
+ * @author Junerver
+ * @date: 2022/10/28-9:48
+ * @Email: junerver@gmail.com
+ * @Version: v1.0
+ * @param packageName
+ * @param fieldName
+ * @param defaultValue 默认值
+ * @return
+ */
+fun <T> getBuildConfigValue(packageName: String, fieldName: String, defaultValue: T): T {
+    return getBuildConfigValue(packageName, fieldName) as T
+        ?: return defaultValue
 }
