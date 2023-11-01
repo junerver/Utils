@@ -1,5 +1,6 @@
 package xyz.junerver.utils
 
+import org.json.JSONObject
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -103,7 +104,10 @@ class ExampleUnitTest {
 
     @Test
     fun testSwap() {
-
+        val json = JSONObject()
+        json.put("a","asdfasf")
+        json.put("b", "asdfasf")
+        println(json.toString())
     }
 
     class Person(var name:String)

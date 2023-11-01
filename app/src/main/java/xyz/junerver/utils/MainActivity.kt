@@ -68,6 +68,28 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val jo = json {
+            "name" to "zhangsan"
+            val arr = arrayOf(1,2,3,4)
+            "keys" to arr.map {
+                json {
+                    "key" to it
+                    "index" to "学号：$it"
+                }
+            }.toTypedArray()
+            "info" to json {
+                "email" to "xxxx@mail.com"
+                "age" to 18
+                "sex" to '1'
+            }
+            "o" to {
+                "2" to "3"
+                "arr" to listOf<String>("1","2","3")
+            }
+        }
+
+        tvContent.text = jo.toString()
+
         Log.d(TAG, "metadata: ${getMetaData("value_key", "def")}")
         btnEnable.setOnClickListener {
 
@@ -88,15 +110,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         //无效
-        etString.keyListener = object : DigitsKeyListener(Locale.CHINA) {
-            override fun getInputType(): Int {
-                return InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_NORMAL
-            }
-
-            override fun getAcceptedChars(): CharArray {
-                return "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()
-            }
-        }
+//        etString.keyListener = object : DigitsKeyListener(Locale.CHINA) {
+//            override fun getInputType(): Int {
+//                return InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_NORMAL
+//            }
+//
+//            override fun getAcceptedChars(): CharArray {
+//                return "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()
+//            }
+//        }
 
         etString.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {

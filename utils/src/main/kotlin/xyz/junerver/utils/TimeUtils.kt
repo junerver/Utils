@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import xyz.junerver.utils.TimeUtils.TimeUnit.Companion.currentTimeUnit
 import xyz.junerver.utils.TimeUtils.TimeUnit.Companion.timeUnitMillis
 import xyz.junerver.utils.ex.safeConvertToLong
-import java.lang.StringBuilder
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
@@ -428,18 +427,18 @@ object TimeUtils {
         val minute = ca.get(Calendar.MINUTE)       // 分
         val hour = ca.get(Calendar.HOUR)           // 小时
         val second = ca.get(Calendar.SECOND)       // 秒
-        return "" + year + (month + 1) + day + hour + minute + second+ (Math.random()*1000).toInt()
+        return "" + year + (month + 1) + day + hour + minute + second + (Math.random() * 1000).toInt()
     }
 
     /**
-    * Description: 判断当前时间是否为上午
-    * @author Junerver
-    * @date: 2022/2/9-10:18
-    * @Email: junerver@gmail.com
-    * @Version: v1.0
-    * @param
-    * @return
-    */
+     * Description: 判断当前时间是否为上午
+     * @author Junerver
+     * @date: 2022/2/9-10:18
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
     fun isMorning(): Boolean {
         return currentTimeMillis().formatMillisTimestamp("HH").toInt() < 12
     }
@@ -475,16 +474,17 @@ object TimeUtils {
     }
 
     /**
-    * Description: 毫秒时间转换成时长字符
-    * @author Junerver
-    * @date: 2022/2/9-10:28
-    * @Email: junerver@gmail.com
-    * @Version: v1.0
-    * @param
-    * @return
-    */
+     * Description: 毫秒时间转换成时长字符
+     * @author Junerver
+     * @date: 2022/2/9-10:28
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param millis 毫秒级时间长度
+     * @param precision 精度，天、时、分、秒、毫秒
+     * @return
+     */
     @JvmStatic
-    fun millis2FitTimeSpan(millis: Long, precision: Int=1): String? {
+    fun millis2FitTimeSpan(millis: Long, precision: Int = 1): String? {
         var millis = millis
         var precision = precision
         if (precision <= 0) return null

@@ -1,5 +1,6 @@
 package xyz.junerver.utils
 
+import android.text.TextUtils
 import xyz.junerver.utils.ex.x
 import java.util.Timer
 import java.util.TimerTask
@@ -140,7 +141,7 @@ fun getBuildConfigValue(packageName: String, fieldName: String): Any? {
 }
 
 /**
- * Description:
+ * Description: 带默认值版本
  * @author Junerver
  * @date: 2022/10/28-9:48
  * @Email: junerver@gmail.com
@@ -153,4 +154,28 @@ fun getBuildConfigValue(packageName: String, fieldName: String): Any? {
 fun <T> getBuildConfigValue(packageName: String, fieldName: String, defaultValue: T): T {
     return getBuildConfigValue(packageName, fieldName) as T
         ?: return defaultValue
+}
+
+/**
+ * Description: 解析url参数，将其转换为map对象
+ * @author Junerver
+ * @date: 2022/12/14-16:26
+ * @Email: junerver@gmail.com
+ * @Version: v1.0
+ * @param
+ * @return
+ */
+fun getUrlParams(param: String): Map<String, String>? {
+    val map: MutableMap<String, String> = HashMap<String, String>(0)
+    if (TextUtils.isEmpty(param)) {
+        return map
+    }
+    val params = param.split("&").toTypedArray()
+    for (i in params.indices) {
+        val p = params[i].split("=").toTypedArray()
+        if (p.size == 2) {
+            map[p[0]] = p[1]
+        }
+    }
+    return map
 }

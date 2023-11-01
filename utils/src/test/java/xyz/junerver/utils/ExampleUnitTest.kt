@@ -10,6 +10,8 @@ import xyz.junerver.utils.TimeUtils.formatMillisTimestamp
 import xyz.junerver.utils.TimeUtils.isMorning
 import xyz.junerver.utils.ex.isEmail
 import java.io.File
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -36,6 +38,20 @@ class ExampleUnitTest {
         FileUtils.copy("", "") { file: File, file1: File ->
             true
         }
+    }
+
+    @Test
+    fun testRadix() {
+        val a = 0b001
+        val b = 0b100
+        val c = a or b
+        // 数字以二进制形式输出为字符串 Integer.toBinaryString(mAdminState)
+        println(c.toString(2))
+//        将二进制字符串转成二进制数字
+        val d = Integer.valueOf("111",2)
+        println(d.toString(2))
+        val e = "1001".toInt(2)
+        println(e)
     }
 
     @Test
@@ -67,7 +83,7 @@ class ExampleUnitTest {
 
     @Test
     fun testJsonBuilder(){
-        var jo = json {
+        val jo = json {
             "name" to "zhangsan"
             val arr = arrayOf(1,2,3,4)
             "keys" to arr.map {
@@ -103,4 +119,42 @@ class ExampleUnitTest {
         ))
         assertEquals(3,ja.length())
     }
+
+    @OptIn(ExperimentalTime::class)
+    @Test
+    fun testValue() {
+        val t3 = measureTime {
+            repeat(100) {
+                Normal("1000")
+            }
+        }
+        val t5 = measureTime {
+            repeat(100) {
+                Normal2("1000")
+            }
+        }
+        val t6 = measureTime {
+            repeat(100) {
+                Normal3("1000")
+            }
+        }
+
+        println("$t3 $t5 $t6")
+    }
+
+    class Normal(val time: String)
+
+    data class Normal3(val time: String)
+
+    @JvmInline
+    value class Normal2(val time: String)
+
+    @Test
+    fun testJSON() {
+        val json = JSONObject()
+        json.put("a","asdfasf")
+        json.put("b", "asdfasf")
+        println(json.toString())
+    }
+
 }
