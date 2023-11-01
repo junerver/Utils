@@ -1,15 +1,15 @@
 package xyz.junerver.utils
 
-import xyz.junerver.utils.RomUtils.RomInfo
-import xyz.junerver.utils.RomUtils
-import android.os.Build
-import android.text.TextUtils
-import android.os.Environment
 import android.annotation.SuppressLint
-import java.io.*
-import java.lang.Exception
-import java.lang.UnsupportedOperationException
-import java.util.*
+import android.os.Build
+import android.os.Environment
+import android.text.TextUtils
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.io.InputStreamReader
+import java.util.Properties
 
 /**
  * <pre>
@@ -386,17 +386,10 @@ class RomUtils private constructor() {
                 val p = Runtime.getRuntime().exec("getprop $propName")
                 input = BufferedReader(InputStreamReader(p.inputStream), 1024)
                 val ret = input.readLine()
-                if (ret != null) {
-                    return ret
-                }
+                ret?.let { return ret }
             } catch (ignore: IOException) {
             } finally {
-                if (input != null) {
-                    try {
-                        input.close()
-                    } catch (ignore: IOException) { /**/
-                    }
-                }
+                runCatching { input?.close() }
             }
             return ""
         }

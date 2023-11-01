@@ -1,11 +1,11 @@
 package xyz.junerver.utils
 
-import xyz.junerver.utils.Utils.getApp
-import android.os.Build
 import android.content.Intent
 import android.net.Uri
-import android.text.TextUtils
+import android.os.Build
 import android.os.StatFs
+import android.text.TextUtils
+import xyz.junerver.utils.Utils.getApp
 import xyz.junerver.utils.ex.x
 import java.io.*
 import java.net.URL
@@ -26,14 +26,14 @@ import kotlin.experimental.and
  */
 object FileUtils {
     /**
-    * Description: kt在 1.4 之后增加了对SAM的支持，只需对 [interface] 增加 [fun] 关键字即可
-    * @author Junerver
-    * @date: 2021/11/30-9:37
-    * @Email: junerver@gmail.com
-    * @Version: v1.0
-    * @param
-    * @return
-    */
+     * Description: kt在 1.4 之后增加了对SAM的支持，只需对 [interface] 增加 [fun] 关键字即可
+     * @author Junerver
+     * @date: 2021/11/30-9:37
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
     fun interface OnReplaceListener {
         fun onReplace(srcFile: File, destFile: File): Boolean
     }
@@ -59,11 +59,15 @@ object FileUtils {
      */
     @JvmStatic
     fun isFileExists(file: File?): Boolean {
-        if (file == null) return false
-        return if (file.exists()) {
-            true
-        } else isFileExists(file.absolutePath)
+        file ?: return false
+        return if (file.exists()) true else isFileExists(file.absolutePath)
     }
+
+    public inline fun <T> Boolean.switches(
+        noinline ifTrue: (Boolean) -> T,
+        noinline ifFalse: (Boolean) -> T
+    ): T =
+        if (this) ifTrue(this) else ifFalse(this)
 
     /**
      * 根据文件路径判断文件是否存在
@@ -73,9 +77,7 @@ object FileUtils {
      */
     fun isFileExists(filePath: String?): Boolean {
         val file = getFileByPath(filePath) ?: return false
-        return if (file.exists()) {
-            true
-        } else isFileExistsApi29(filePath)
+        return if (file.exists()) true else isFileExistsApi29(filePath)
     }
 
     //api > 29 时检查文件是否存在
@@ -117,7 +119,7 @@ object FileUtils {
      */
     fun rename(file: File?, newName: String): Boolean {
         // file is null then return false
-        if (file == null || !file.exists()) return false
+        file?.takeIf { it.exists() } ?: return false
         // the new name is space then return false
         if (UtilsBridge.isSpace(newName)) return false
         // the new name equals old name then return true
@@ -207,7 +209,7 @@ object FileUtils {
      */
     @JvmStatic
     fun createOrExistsFile(file: File?): Boolean {
-        if (file == null) return false
+        file ?: return false
         if (file.exists()) return file.isFile
         return if (!createOrExistsDir(file.parentFile)) false else try {
             file.createNewFile()
@@ -235,7 +237,7 @@ object FileUtils {
      */
     @JvmStatic
     fun createFileByDeleteOldFile(file: File?): Boolean {
-        if (file == null) return false
+        file ?: return false
         // file exists and unsuccessfully delete then return false
         if (file.exists() && !file.delete()) return false
         return if (!createOrExistsDir(file.parentFile)) false else try {
@@ -275,6 +277,7 @@ object FileUtils {
     ): Boolean {
         return copy(getFileByPath(srcPath), getFileByPath(destPath), listener)
     }
+
     /**
      * Copy the directory or file.
      *
@@ -288,7 +291,7 @@ object FileUtils {
         dest: File?,
         listener: OnReplaceListener? = null
     ): Boolean {
-        if (src == null) return false
+        src ?: return false
         return if (src.isDirectory) {
             copyDir(src, dest, listener)
         } else copyFile(
@@ -375,18 +378,10 @@ object FileUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     fun move(
-        src: File?,
-        dest: File?,
-        listener: OnReplaceListener? = null
+        src: File?, dest: File?, listener: OnReplaceListener? = null
     ): Boolean {
-        if (src == null) return false
-        return if (src.isDirectory) {
-            moveDir(src, dest, listener)
-        } else moveFile(
-            src,
-            dest,
-            listener
-        )
+        src ?: return false
+        return if (src.isDirectory) moveDir(src, dest, listener) else moveFile(src, dest, listener)
     }
 
     /**
@@ -398,9 +393,7 @@ object FileUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     fun moveDir(
-        srcDir: File?,
-        destDir: File?,
-        listener: OnReplaceListener?
+        srcDir: File?, destDir: File?, listener: OnReplaceListener?
     ): Boolean {
         return copyOrMoveDir(srcDir, destDir, listener, true)
     }
@@ -498,7 +491,7 @@ object FileUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     fun delete(file: File?): Boolean {
-        if (file == null) return false
+        file ?: return false
         return if (file.isDirectory) {
             deleteDir(file)
         } else deleteFile(file)
@@ -511,7 +504,7 @@ object FileUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     private fun deleteDir(dir: File?): Boolean {
-        if (dir == null) return false
+        dir ?: return false
         // dir doesn't exist then return true
         if (!dir.exists()) return true
         // dir isn't a directory then return false
@@ -621,6 +614,7 @@ object FileUtils {
         }
         return true
     }
+
     /**
      * Return the files in directory.
      *
@@ -633,6 +627,7 @@ object FileUtils {
     fun listFilesInDir(dirPath: String?, comparator: Comparator<File?>? = null): List<File?> {
         return listFilesInDir(getFileByPath(dirPath), false, comparator)
     }
+
     /**
      * Return the files in directory.
      *
@@ -672,6 +667,7 @@ object FileUtils {
     ): List<File?> {
         return listFilesInDir(getFileByPath(dirPath), isRecursive, comparator)
     }
+
     /**
      * Return the files in directory.
      *
@@ -773,6 +769,7 @@ object FileUtils {
     ): List<File?> {
         return listFilesInDirWithFilter(getFileByPath(dirPath), filter, isRecursive, comparator)
     }
+
     /**
      * Return the files that satisfy the filter in directory.
      *
@@ -789,9 +786,7 @@ object FileUtils {
         comparator: Comparator<File?>? = null
     ): List<File?> {
         val files = listFilesInDirWithFilterInner(dir, filter, isRecursive)
-        if (comparator != null) {
-            Collections.sort(files, comparator)
-        }
+        comparator?.let {  Collections.sort(files, comparator) }
         return files
     }
 
@@ -861,7 +856,7 @@ object FileUtils {
      * @return the charset of file simply
      */
     fun getFileCharsetSimple(file: File?): String {
-        if (file == null) return ""
+        file ?: return ""
         if (isUtf8(file)) return "UTF-8"
         var p = 0
         var `is`: InputStream? = null
@@ -901,7 +896,7 @@ object FileUtils {
      * @return `true`: yes<br></br>`false`: no
      */
     fun isUtf8(file: File?): Boolean {
-        if (file == null) return false
+        file ?: return false
         var `is`: InputStream? = null
         try {
             val bytes = ByteArray(24)
@@ -1060,10 +1055,8 @@ object FileUtils {
      * @return the size
      */
     fun getSize(file: File?): String {
-        if (file == null) return ""
-        return if (file.isDirectory) {
-            getDirSize(file)
-        } else getFileSize(file)
+        file ?: return ""
+        return if (file.isDirectory) getDirSize(file) else getFileSize(file)
     }
 
     /**
@@ -1105,7 +1098,7 @@ object FileUtils {
      * @return the length
      */
     fun getLength(file: File?): Long {
-        if (file == null) return 0
+        file ?: return 0
         return if (file.isDirectory) {
             getDirLength(file)
         } else getFileLength(file)
@@ -1204,7 +1197,7 @@ object FileUtils {
      * @return the md5 of file
      */
     fun getFileMD5(file: File?): ByteArray? {
-        if (file == null) return null
+        file ?: return null
         var dis: DigestInputStream? = null
         try {
             val fis = FileInputStream(file)
@@ -1237,7 +1230,7 @@ object FileUtils {
      * @return the file's path of directory
      */
     fun getDirName(file: File?): String {
-        return if (file == null) "" else getDirName(file.absolutePath)
+        return file?.let { getDirName(it.absolutePath) } ?: ""
     }
 
     /**
@@ -1271,7 +1264,7 @@ object FileUtils {
      */
     fun getFileNameNoExtension(filePath: String): String {
         if (UtilsBridge.isSpace(filePath)) return ""
-       return getFileNameNoExtension(getFileByPath(filePath))
+        return getFileNameNoExtension(getFileByPath(filePath))
     }
 
     /**
@@ -1314,7 +1307,7 @@ object FileUtils {
      */
     @JvmStatic
     fun notifySystemToScan(file: File?) {
-        if (file == null || !file.exists()) return
+        file?.takeIf { it.exists() } ?: return
         val intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
         intent.data = Uri.parse("file://" + file.absolutePath)
         getApp().sendBroadcast(intent)

@@ -6,9 +6,22 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
-import android.text.*
+import android.text.Editable
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.TextPaint
+import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
-import android.text.style.*
+import android.text.style.BackgroundColorSpan
+import android.text.style.CharacterStyle
+import android.text.style.ClickableSpan
+import android.text.style.DynamicDrawableSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.ImageSpan
+import android.text.style.StrikethroughSpan
+import android.text.style.StyleSpan
+import android.text.style.URLSpan
+import android.text.style.UnderlineSpan
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
@@ -17,7 +30,6 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.Size
 import androidx.core.content.ContextCompat
-
 
 
 //region EditText 扩展
@@ -350,17 +362,17 @@ class VerticalImageSpan(context: Context, resourceId: Int, verticalAlignment: In
     ): Int {
         val d = drawable
         val rect = d.bounds
-        if (fm != null) {
+        fm?.let {
             val fmPaint = paint.fontMetricsInt
             //获得文字、图片高度
             val fontHeight = fmPaint.bottom - fmPaint.top
             val drHeight = rect.bottom - rect.top
             val top = drHeight / 2 - fontHeight / 4
             val bottom = drHeight / 2 + fontHeight / 4
-            fm.ascent = -bottom
-            fm.top = -bottom
-            fm.bottom = top
-            fm.descent = top
+            it.ascent = -bottom
+            it.top = -bottom
+            it.bottom = top
+            it.descent = top
         }
         return rect.right
     }

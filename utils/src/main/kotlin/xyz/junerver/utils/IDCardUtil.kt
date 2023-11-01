@@ -1,9 +1,12 @@
 package xyz.junerver.utils
 
+import xyz.junerver.utils.ex.isNotNullOrEmpty
 import xyz.junerver.utils.ex.x
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import kotlin.contracts.ExperimentalContracts
 
 /**
  * @Description:主要功能: 居民身份证工具类
@@ -16,6 +19,7 @@ object IDCardUtil {
     val CHINA_ID_MIN_LENGTH = 15
     var cityCodes: MutableMap<String, String> = HashMap()
     var twFirstCode: MutableMap<String, Int> = HashMap()
+
     //台湾身份首字母对应数字
     var hkFirstCode: MutableMap<String, Int> = HashMap()
 
@@ -164,8 +168,9 @@ object IDCardUtil {
      * @param val 待验证的字符串
      * @return 是否是数字
      */
-    private fun isNum(`val`: String?): Boolean {
-        return !(`val` == null || "" == `val`) && `val`.matches("^[0-9]*$".toRegex())
+    @OptIn(ExperimentalContracts::class)
+    private fun isNum(value: String?): Boolean {
+        return value.isNotNullOrEmpty() && value.matches("^[0-9]*$".toRegex())
     }
 
     /**
@@ -175,11 +180,8 @@ object IDCardUtil {
      * @return 校验结果
      */
     fun validateIdCard18(idCard: String?): Boolean {
-
         var bTrue = false
-        if (idCard == null) {
-            return false
-        }
+        idCard ?: return false
         if (idCard.length == CHINA_ID_MAX_LENGTH) {
             // 前17位
             val code17 = idCard.substring(0, 17)
@@ -187,15 +189,13 @@ object IDCardUtil {
             val code18 = idCard.substring(17, CHINA_ID_MAX_LENGTH)
             if (isNum(code17)) {
                 val cArr = code17.toCharArray()
-                if (cArr != null) {
-                    val iCard = converCharToInt(cArr)
-                    val iSum17 = getPowerSum(iCard)
-                    // 获取校验位
-                    val `val` = getCheckCode18(iSum17)
-                    if (`val`.length > 0) {
-                        if (`val`.equals(code18, ignoreCase = true)) {
-                            bTrue = true
-                        }
+                val iCard = converCharToInt(cArr)
+                val iSum17 = getPowerSum(iCard)
+                // 获取校验位
+                val value = getCheckCode18(iSum17)
+                if (value.isNotEmpty()) {
+                    if (value.equals(code18, ignoreCase = true)) {
+                        bTrue = true
                     }
                 }
             }
@@ -215,9 +215,7 @@ object IDCardUtil {
         }
         if (isNum(idCard)) {
             val proCode = idCard.substring(0, 2)
-            if (cityCodes[proCode] == null) {
-                return false
-            }
+            cityCodes[proCode] ?: return false
             val birthCode = idCard.substring(6, 12)
             var birthDate: Date? = null
             try {
@@ -228,7 +226,12 @@ object IDCardUtil {
 
             val cal = Calendar.getInstance()
             if (birthDate != null) cal.time = birthDate
-            if (!validateDateSmllerThenNow(cal.get(Calendar.YEAR), Integer.valueOf(birthCode.substring(2, 4)), Integer.valueOf(birthCode.substring(4, 6)))) {
+            if (!validateDateSmllerThenNow(
+                    cal.get(Calendar.YEAR),
+                    Integer.valueOf(birthCode.substring(2, 4)),
+                    Integer.valueOf(birthCode.substring(4, 6))
+                )
+            ) {
                 return false
             }
         } else {
@@ -259,9 +262,11 @@ object IDCardUtil {
         when (iMonth) {
             4, 6, 9, 11 -> datePerMonth = 30
             2 -> {
-                val dm = (iYear % 4 == 0 && iYear % 100 != 0 || iYear % 400 == 0) && iYear > MIN && iYear < year
+                val dm =
+                    (iYear % 4 == 0 && iYear % 100 != 0 || iYear % 400 == 0) && iYear > MIN && iYear < year
                 datePerMonth = if (dm) 29 else 28
             }
+
             else -> datePerMonth = 31
         }
         return iDate >= 1 && iDate <= datePerMonth
@@ -346,7 +351,9 @@ object IDCardUtil {
         var card = idCard.replace("[\\(|\\)]".toRegex(), "")
         var sum: Int? = 0
         if (card.length == 9) {
-            sum = (card.substring(0, 1).uppercase().toCharArray()[0].toInt() - 55) * 9 + (card.substring(1, 2).toUpperCase().toCharArray()[0].toInt() - 55) * 8
+            sum = (card.substring(0, 1).uppercase()
+                .toCharArray()[0].toInt() - 55) * 9 + (card.substring(1, 2).toUpperCase()
+                .toCharArray()[0].toInt() - 55) * 8
             card = card.substring(1, 9)
         } else {
             sum = 522 + (card.substring(0, 1).uppercase().toCharArray()[0].toInt() - 55) * 8

@@ -329,14 +329,9 @@ object TimeUtils {
      * @return
      */
     fun getAge(birthdayDetail: IntArray?): Int {
-        if (birthdayDetail == null || birthdayDetail.size < 3) {
-            return 0
-        }
-
+        birthdayDetail?.takeUnless { birthdayDetail.size < 3 } ?: return 0
         val nowDetails = getDateDetail(currentTimeUnit)
-
         var age = nowDetails[0] - birthdayDetail[0]
-
         if (nowDetails[1] < birthdayDetail[1]) {
             age -= 1
         } else if (nowDetails[1] == birthdayDetail[1]) {
@@ -344,7 +339,6 @@ object TimeUtils {
                 age -= 1
             }
         }
-
         return age
     }
 

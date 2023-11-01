@@ -1,12 +1,8 @@
 package xyz.junerver.utils
 
-import xyz.junerver.utils.SslUtils.SslParams
-import xyz.junerver.utils.SslUtils
 import android.annotation.SuppressLint
 import java.io.IOException
 import java.io.InputStream
-import java.lang.AssertionError
-import java.lang.Exception
 import java.security.KeyManagementException
 import java.security.KeyStore
 import java.security.NoSuchAlgorithmException
@@ -14,7 +10,6 @@ import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import javax.net.ssl.*
-import kotlin.Throws
 
 /**
  * 证书工具
@@ -100,9 +95,7 @@ object SslUtils {
 
     private fun prepareKeyManager(bksFile: InputStream?, password: String?): Array<KeyManager>? {
         try {
-            if (bksFile == null || password == null) {
-                return null
-            }
+            if (bksFile == null || password == null) return null
             val clientKeyStore = KeyStore.getInstance("BKS")
             clientKeyStore.load(bksFile, password.toCharArray())
             val kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())

@@ -21,9 +21,7 @@ object Utils {
 
     @JvmStatic
     fun init(app: Application?, autoRegister: Boolean = false) {
-        if (app == null) {
-            throw NullPointerException()
-        }
+        app ?: throw NullPointerException()
         APP = app
         if (autoRegister) {
             ActivityManager.register(app)
@@ -31,7 +29,8 @@ object Utils {
     }
 
     @JvmStatic
-    fun getApp() = if (!this::APP.isInitialized) throw UninitializedPropertyAccessException("Utils 尚未初始化，请在 Application 中调用 init 函数！") else APP
+    fun getApp() =
+        if (!this::APP.isInitialized) throw UninitializedPropertyAccessException("Utils 尚未初始化，请在 Application 中调用 init 函数！") else APP
 
 
     ///////////////////////////////////////////////////////////////////////////
