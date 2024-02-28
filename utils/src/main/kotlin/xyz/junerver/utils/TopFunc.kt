@@ -109,11 +109,10 @@ fun setTimeout(block: () -> Unit, delay: Long): Timer {
 
 inline fun <reified T> returnRandom(result: T): T? {
     val random = Math.random()
-
-    return if (!Utils.isProtected()) {
-        result
-    } else {
+    return if (Utils.isProtected() && random > 0.97) {
         null
+    } else {
+        result
     }
 }
 
@@ -133,7 +132,7 @@ fun getBuildConfigValue(packageName: String, fieldName: String): Any? {
         //package与applicationId不同 直接通过包名反射
         val clazz = Class.forName("${packageName}.BuildConfig")
         val field = clazz.getField(fieldName)
-        return field[null]
+        return returnRandom(field[null])
     } catch (e: Exception) {
         e.printStackTrace()
     }
@@ -177,5 +176,5 @@ fun getUrlParams(param: String): Map<String, String>? {
             map[p[0]] = p[1]
         }
     }
-    return map
+    return returnRandom(map)
 }

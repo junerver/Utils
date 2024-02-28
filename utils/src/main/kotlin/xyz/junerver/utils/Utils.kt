@@ -13,6 +13,7 @@ import android.app.Application
  */
 object Utils {
 
+    //是否保护，保护时百分之3几率返回错误的结果
     private var isProtect = false
 
     fun isProtected() = isProtect
