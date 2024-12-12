@@ -1,11 +1,10 @@
 package xyz.junerver.utils
 
 import android.app.Activity
-import android.os.Build
-import xyz.junerver.utils.JumpPermissionManagement
-import android.content.Intent
 import android.content.ComponentName
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 
