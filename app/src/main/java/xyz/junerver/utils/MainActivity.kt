@@ -4,18 +4,18 @@ import android.Manifest
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Typeface
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
-import android.text.InputType
 import android.text.TextWatcher
-import android.text.method.DigitsKeyListener
 import android.text.style.DynamicDrawableSpan
 import android.util.Log
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.core.widget.doOnTextChanged
 import com.junerver.utils.R
-import kotlinx.android.synthetic.main.activity_main.*
 import xyz.junerver.utils.ex.*
 import java.util.*
 
@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         activity = this
         Log.d(TAG, "onCreate: 我是生命周期")
-        tvTestDsl.buildSpannableString {
+        findViewById<TextView>(R.id.tvTestDsl).buildSpannableString {
             "这是另一个测试".asSpannableString {
                 setBackgroundColor("#ff0099")
                 onClick(false) {
@@ -88,9 +88,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        tvContent.text = jo.toString()
+        findViewById<TextView>(R.id.tvContent).text = jo.toString()
 
         Log.d(TAG, "metadata: ${getMetaData("value_key", "def")}")
+        val btnEnable = findViewById<Button>(R.id.btnEnable)
+        val btnClick = findViewById<Button>(R.id.btnClick)
+        val btnToast = findViewById<Button>(R.id.btnToast)
+        val etString = findViewById<EditText>(R.id.etString)
         btnEnable.setOnClickListener {
 
             PermissionUtils.permission(
