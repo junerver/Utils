@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'maven-publish'
+apply plugin: "com.vanniktech.maven.publish"
 
 
 android {
@@ -38,7 +38,6 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.6.0'
     implementation 'androidx.appcompat:appcompat:1.0.0'
     api 'com.google.code.gson:gson:2.9.0'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
@@ -46,22 +45,3 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     testImplementation 'org.json:json:20220320'
 }
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.17.0'
-    }
-}
-
-allprojects {
-    plugins.withId("com.vanniktech.maven.publish") {
-        mavenPublish {
-            sonatypeHost = "S01"
-        }
-    }
-}
-
-apply plugin: "com.vanniktech.maven.publish"
