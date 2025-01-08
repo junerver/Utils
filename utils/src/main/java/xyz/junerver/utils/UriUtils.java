@@ -10,8 +10,10 @@ import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import androidx.core.content.FileProvider;
 
@@ -305,7 +307,12 @@ public final class UriUtils {
         }
     }
 
-    private static File copyUri2Cache(Uri uri) {
+    /**
+     * 拷贝uri指向的文件，使用时间戳作为文件名
+     * @param uri
+     * @return
+     */
+    private static File copyUri2Cache1(Uri uri) {
         Log.d("UriUtils", "copyUri2Cache() called");
         InputStream is = null;
         try {
@@ -325,6 +332,96 @@ public final class UriUtils {
                 }
             }
         }
+    }
+
+    // 拷贝uri指向的文件，使用查询文件名，使用源文件作为文件名
+    private static File copyUri2Cache(Uri uri) {
+        Log.d("UriUtils", "copyUri2Cache() called");
+        InputStream is = null;
+        Cursor cursor = null;
+        try {
+            // 获取文件的DisplayName和MIME类型
+            String fileName = null;
+            String mimeType = null;
+            cursor = Utils.getApp().getContentResolver().query(uri, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                fileName = cursor.getString(nameIndex);
+                mimeType = Utils.getApp().getContentResolver().getType(uri);
+            }
+
+            // 如果没有找到文件名，使用系统时间戳作为临时文件名
+            if (fileName == null) {
+                fileName = System.currentTimeMillis() + ".tmp";
+            }
+
+            // 如果没有获取到扩展名，可以根据MIME类型进行推断
+            String extension = mimeType != null ? MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) : null;
+            if (extension == null) {
+                extension = getFileExtensionFromUri(uri);
+            }
+
+            // 使用文件名和扩展名创建临时文件
+            if (extension != null && !fileName.endsWith("." + extension)) {
+                fileName += "." + extension;
+            }
+
+            // 确保文件名唯一，避免冲突
+            File file = getUniqueFile(fileName);
+
+            // 从URI拷贝内容到临时文件
+            is = Utils.getApp().getContentResolver().openInputStream(uri);
+            FileIOUtils.writeFileFromIS(file.getAbsolutePath(), is);
+
+            return file;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    // 辅助函数，尝试从URI获取扩展名
+    private static String getFileExtensionFromUri(Uri uri) {
+        String path = uri.getPath();
+        if (path != null) {
+            int dotIndex = path.lastIndexOf('.');
+            if (dotIndex >= 0) {
+                return path.substring(dotIndex + 1);
+            }
+        }
+        return null;
+    }
+
+    // 辅助函数，确保生成的文件名唯一并删除旧的文件
+    private static File getUniqueFile(String fileName) {
+        File cacheDir = Utils.getApp().getCacheDir();
+        File file = new File(cacheDir, fileName);
+        // 如果文件已存在，删除旧的临时文件
+        if (file.exists()) {
+            boolean deleted = file.delete();
+            if (!deleted) {
+                Log.w("UriUtils", "Failed to delete existing file: " + file.getAbsolutePath());
+            }
+        }
+        // 确保新文件名唯一
+        int count = 1;
+        while (file.exists()) {
+            String newFileName = fileName.replaceFirst("(\\.[^.]+)?$", "_" + count + "$1");
+            file = new File(cacheDir, newFileName);
+            count++;
+        }
+        return file;
     }
 
     /**
